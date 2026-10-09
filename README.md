@@ -85,7 +85,6 @@ The fix packages are not in the repository (third-party work, size); they are re
 ## Credits and license
 
 - **geo-11** — the geo-11 team (DarkStarSword, bo3b, masterotaku and others; 3DMigoto lineage), 3D Vision community / [HelixMod](https://helixmod.blogspot.com/).
-- **Unity Universal Fix** (Unity_Complete) and **geo-11 Preferred** — as distributed with GameBridge.
 - **Unreal Engine 4 Universal Fix 2** — assembled by LOSTI (helixmod community). This project only adds the SRWeave files, a newer geo-11 and a few ini lines (save key, `-dx11`); the original config tool stays in the package.
 - **SR SDK / SR Platform** — Leia Inc. / Acer SpatialLabs (not included; loaded from the installed runtime).
 - **MinHook** — Tsuda Kageyu, BSD 2-Clause (`SRWeave/third_party/minhook`).

@@ -85,7 +85,6 @@ UE4 Universal Fix 2 게임은 `-dx11` 인자로 실행해야 합니다. 설치�
 ## 출처와 라이선스
 
 - **geo-11** — geo-11 팀(DarkStarSword, bo3b, masterotaku 등, 3DMigoto 계보), 3D Vision 커뮤니티 / [HelixMod](https://helixmod.blogspot.com/).
-- **Unity Universal Fix**(Unity_Complete)와 **geo-11 Preferred** — GameBridge와 함께 배포되는 패키지.
 - **Unreal Engine 4 Universal Fix 2** — LOSTI 제작(helixmod 커뮤니티). 이 프로젝트는 SRWeave 파일, 새 geo-11, ini 몇 줄(저장 키, `-dx11`)만 더했고 원래 설정 도구는 패키지에 그대로 있습니다.
 - **SR SDK / SR Platform** — Leia Inc. / Acer SpatialLabs (포함되지 않음, 설치된 런타임에서 로드).
 - **MinHook** — Tsuda Kageyu, BSD 2-Clause (`SRWeave/third_party/minhook`).
