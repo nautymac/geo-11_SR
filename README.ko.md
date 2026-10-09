@@ -10,22 +10,24 @@ geo-11은 3DMigoto 기반의 입체 3D 드라이버로, 게임을 좌우(SBS) �
 
 ## 받기와 설치
 
-[Releases](../../releases)에서 zip을 받아 **한 폴더 안에** 풉니다. 설치기가 패키지를 상대 경로로 찾습니다.
+[Releases](../../releases)에서 **`geo-11_SR_all-in-one.zip`** 하나를 받아 아무 곳에나 풉니다. 설치기와 세 픽스 패키지가 하위 폴더로 들어 있고, 설치기가 기대하는 배치 그대로입니다:
 
 ```
-아무폴더\
+geo-11_SR\
   geo-11_SR_Installer\Geo11SRInstaller.exe
   geo-11 v0.6.109_Unity_Complete_SR\
   geo-11 v0.6.109_Preferred_SR\
   UNREAL_Engine_4_UNIVERSAL-FIX_2_SR\
 ```
 
-| 릴리스 파일 | 내용 |
+| 폴더 | 내용 |
 |---|---|
-| `Geo11SRInstaller.zip` | GUI 설치기(한국어 / 영어)와 한국어 설명서 |
-| `geo-11_v0.6.109_Unity_Complete_SR.zip` | Unity Universal Fix + geo-11 0.6.109 + SRWeave (x64, x32) |
-| `geo-11_v0.6.109_Preferred_SR.zip` | 일반 geo-11 "Preferred" + SRWeave (x64, x32) |
-| `UNREAL_Engine_4_UNIVERSAL-FIX_2_SR.zip` | Unreal Engine 4 Universal Fix 2 (Win11판) + SRWeave, 64비트 전용. geo-11은 0.6.109로 올렸고 원본 0.6.40은 `ShaderFixes\Geo11_0.6.40`에 보관 |
+| `geo-11_SR_Installer\` | GUI 설치기(한국어 / 영어)와 한국어 설명서 |
+| `geo-11 v0.6.109_Unity_Complete_SR\` | Unity Universal Fix + geo-11 0.6.109 + SRWeave (x64, x32) |
+| `geo-11 v0.6.109_Preferred_SR\` | 일반 geo-11 "Preferred" + SRWeave (x64, x32) |
+| `UNREAL_Engine_4_UNIVERSAL-FIX_2_SR\` | Unreal Engine 4 Universal Fix 2 (Win11판) + SRWeave, 64비트 전용. geo-11은 0.6.109로 올렸고 원본 0.6.40은 `ShaderFixes\Geo11_0.6.40`에 보관 |
+
+폴더들은 나란히 두세요. 설치기가 패키지를 상대 경로로 찾습니다.
 
 ## 미리 필요한 것
 

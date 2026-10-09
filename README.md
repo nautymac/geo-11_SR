@@ -10,22 +10,24 @@ It also works **without** an SR panel: switch SR weaving off and it is a plain g
 
 ## Download and install
 
-Get the zips from [Releases](../../releases) and unzip them into **one parent folder**. The installer finds the packages by relative path.
+Download **`geo-11_SR_all-in-one.zip`** from [Releases](../../releases) and unzip it anywhere. It is one zip with the installer and the three fix packages as sub-folders, already in the layout the installer expects:
 
 ```
-AnyFolder\
+geo-11_SR\
   geo-11_SR_Installer\Geo11SRInstaller.exe
   geo-11 v0.6.109_Unity_Complete_SR\
   geo-11 v0.6.109_Preferred_SR\
   UNREAL_Engine_4_UNIVERSAL-FIX_2_SR\
 ```
 
-| Release file | Contents |
+| Folder | Contents |
 |---|---|
-| `Geo11SRInstaller.zip` | GUI installer (English / Korean) and the Korean manual |
-| `geo-11_v0.6.109_Unity_Complete_SR.zip` | Unity Universal Fix + geo-11 0.6.109 + SRWeave (x64, x32) |
-| `geo-11_v0.6.109_Preferred_SR.zip` | Generic geo-11 "Preferred" + SRWeave (x64, x32) |
-| `UNREAL_Engine_4_UNIVERSAL-FIX_2_SR.zip` | Unreal Engine 4 Universal Fix 2 (Win11 build) + SRWeave, 64-bit only. geo-11 updated to 0.6.109; the original 0.6.40 is kept in `ShaderFixes\Geo11_0.6.40` |
+| `geo-11_SR_Installer\` | GUI installer (English / Korean) and the Korean manual |
+| `geo-11 v0.6.109_Unity_Complete_SR\` | Unity Universal Fix + geo-11 0.6.109 + SRWeave (x64, x32) |
+| `geo-11 v0.6.109_Preferred_SR\` | Generic geo-11 "Preferred" + SRWeave (x64, x32) |
+| `UNREAL_Engine_4_UNIVERSAL-FIX_2_SR\` | Unreal Engine 4 Universal Fix 2 (Win11 build) + SRWeave, 64-bit only. geo-11 updated to 0.6.109; the original 0.6.40 is kept in `ShaderFixes\Geo11_0.6.40` |
+
+Keep the folders side by side: the installer finds the packages by relative path.
 
 ## Requirements
 
