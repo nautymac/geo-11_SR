@@ -9,9 +9,9 @@ SRWeave/build-x86/
 
 # third-party packages (geo-11 by the geo-11 team, Unity Universal Fix, UE4 Universal Fix 2 by LOSTI / helixmod community):
 # not redistributed here - see README for where to get them and how the SR files are added
-Unity/
-Preferred/
-UE4/
+Geo-11_Unity/
+Geo-11_DX11/
+Geo-11_UE4/
 
 # logs / caches
 *.log

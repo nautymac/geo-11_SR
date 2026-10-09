@@ -15,17 +15,17 @@ geo-11은 3DMigoto 기반의 입체 3D 드라이버로, 게임을 좌우(SBS) �
 ```
 geo-11_SR\
   Installer\Geo11SRInstaller.exe
-  Unity\
-  Preferred\
-  UE4\
+  Geo-11_Unity\
+  Geo-11_DX11\
+  Geo-11_UE4\
 ```
 
 | 폴더 | 내용 |
 |---|---|
 | `Installer\` | GUI 설치기(한국어 / 영어)와 한국어 설명서 |
-| `Unity\` | Unity Universal Fix + geo-11 0.6.109 + SRWeave (x64, x32) |
-| `Preferred\` | 일반 geo-11 "Preferred" + SRWeave (x64, x32) |
-| `UE4\` | Unreal Engine 4 Universal Fix 2 (Win11판) + SRWeave, 64비트 전용. geo-11은 0.6.109로 올렸고 원본 0.6.40은 `ShaderFixes\Geo11_0.6.40`에 보관 |
+| `Geo-11_Unity\` | Unity Universal Fix + geo-11 0.6.109 + SRWeave (x64, x32) |
+| `Geo-11_DX11\` | 일반 geo-11 "Preferred" + SRWeave (x64, x32) |
+| `Geo-11_UE4\` | Unreal Engine 4 Universal Fix 2 (Win11판) + SRWeave, 64비트 전용. geo-11은 0.6.109로 올렸고 원본 0.6.40은 `ShaderFixes\Geo11_0.6.40`에 보관 |
 
 폴더들은 나란히 두세요. 설치기가 패키지를 상대 경로로 찾습니다.
 

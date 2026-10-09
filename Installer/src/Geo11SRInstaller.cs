@@ -1,7 +1,7 @@
 // geo-11 SR 설치기 - Unity / 일반 geo-11 패키지를 게임에 설치하고, 탭별 선택에 따라 설정 파일을 고친다.
 // 단일 WinForms exe (.NET Framework 4.x). 패키지 폴더는 exe 폴더 옆에 있어야 한다:
-//   ..\Unity\{x64,x32}
-//   ..\Preferred\{x64,x32}
+//   ..\Geo-11_Unity\{x64,x32}
+//   ..\Geo-11_DX11\{x64,x32}
 // 고치는 파일: d3dxdm.ini (direct_mode, dm_separation, dm_convergence, dm_auto_convergence),
 //   ShaderFixesDM\hotkeys.ini (Key = ...), d3dx.ini (hunting, toggle_hunting, reload_config, reload_fixes,
 //   show_original; Unity include 줄은 UnitySwitch.ps1), SRWeave.ini (weave, swap_eyes, lens, key_*).
@@ -621,9 +621,9 @@ namespace Geo11SR
             root = Path.GetDirectoryName(exeDir);
             pkgDirs = new Dictionary<string, string> {
                 // short folder names; the long names of the first releases are still accepted
-                { "unity", FindPkg(root, "Unity", "geo-11 v0.6.109_Unity_Complete_SR") },
-                { "plain", FindPkg(root, "Preferred", "geo-11 v0.6.109_Preferred_SR") },
-                { "ue4",   FindPkg(root, "UE4", "UNREAL_Engine_4_UNIVERSAL-FIX_2_SR") },   // x64 only, no x64/x32 subfolders
+                { "unity", FindPkg(root, "Geo-11_Unity", "Unity", "geo-11 v0.6.109_Unity_Complete_SR") },
+                { "plain", FindPkg(root, "Geo-11_DX11", "Preferred", "geo-11 v0.6.109_Preferred_SR") },
+                { "ue4",   FindPkg(root, "Geo-11_UE4", "UE4", "UNREAL_Engine_4_UNIVERSAL-FIX_2_SR") },   // x64 only, no x64/x32 subfolders
             };
             gamesFile = Path.Combine(exeDir, "games.list");
             Lang.Load(exeDir);   // settings.ini "lang=ko|en", else the Windows display language
@@ -661,11 +661,11 @@ namespace Geo11SR
             RefreshGameList();
         }
 
-        // package folder next to the installer folder: the short name if it exists, else the old long name, else the short name (for messages)
-        static string FindPkg(string root, string shortName, string longName)
+        // package folder next to the installer folder: the first of the given names that exists (current name first, older names after), else the first (for messages)
+        static string FindPkg(string root, params string[] names)
         {
-            string s = Path.Combine(root, shortName), l = Path.Combine(root, longName);
-            return Directory.Exists(s) || !Directory.Exists(l) ? s : l;
+            foreach (var n in names) if (Directory.Exists(Path.Combine(root, n))) return Path.Combine(root, n);
+            return Path.Combine(root, names[0]);
         }
 
         // ---- look ------------------------------------------------------------------------------

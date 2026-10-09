@@ -15,17 +15,17 @@ Download **`geo-11_SR_all-in-one.zip`** from [Releases](../../releases) and unzi
 ```
 geo-11_SR\
   Installer\Geo11SRInstaller.exe
-  Unity\
-  Preferred\
-  UE4\
+  Geo-11_Unity\
+  Geo-11_DX11\
+  Geo-11_UE4\
 ```
 
 | Folder | Contents |
 |---|---|
 | `Installer\` | GUI installer (English / Korean) and the Korean manual |
-| `Unity\` | Unity Universal Fix + geo-11 0.6.109 + SRWeave (x64, x32) |
-| `Preferred\` | Generic geo-11 "Preferred" + SRWeave (x64, x32) |
-| `UE4\` | Unreal Engine 4 Universal Fix 2 (Win11 build) + SRWeave, 64-bit only. geo-11 updated to 0.6.109; the original 0.6.40 is kept in `ShaderFixes\Geo11_0.6.40` |
+| `Geo-11_Unity\` | Unity Universal Fix + geo-11 0.6.109 + SRWeave (x64, x32) |
+| `Geo-11_DX11\` | Generic geo-11 "Preferred" + SRWeave (x64, x32) |
+| `Geo-11_UE4\` | Unreal Engine 4 Universal Fix 2 (Win11 build) + SRWeave, 64-bit only. geo-11 updated to 0.6.109; the original 0.6.40 is kept in `ShaderFixes\Geo11_0.6.40` |
 
 Keep the folders side by side: the installer finds the packages by relative path.
 

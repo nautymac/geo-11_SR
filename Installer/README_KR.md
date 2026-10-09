@@ -8,9 +8,9 @@ ReShade·GameBridge는 필요 없습니다. SR 위빙은 SR SDK의 `IDX11Weaver1
 
 | 패키지 | 폴더 |
 |---|---|
-| Unity (Unity Universal Fix + geo-11) | `..\Unity\{x64,x32}` |
-| 일반 geo-11 (Preferred) | `..\Preferred\{x64,x32}` |
-| Unreal Engine 4 (Universal Fix 2, 64비트 전용) | `..\UE4\` |
+| Unity (Unity Universal Fix + geo-11) | `..\Geo-11_Unity\{x64,x32}` |
+| 일반 geo-11 (Preferred) | `..\Geo-11_DX11\{x64,x32}` |
+| Unreal Engine 4 (Universal Fix 2, 64비트 전용) | `..\Geo-11_UE4\` |
 
 ### Unreal Engine 4 게임
 
