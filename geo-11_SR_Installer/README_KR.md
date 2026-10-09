@@ -19,9 +19,11 @@ ReShade·GameBridge는 필요 없습니다. SR 위빙은 SR SDK의 `IDX11Weaver1
 
 ## 미리 설치할 것 / Prerequisites
 
+**SR 패널이 아니어도 됩니다.** SR 위빙을 끄면 일반 geo-11 설치기로 동작합니다(출력 모드 선택). SR 위빙은 geo-11 SBS 화면을 렌티큘러 패널용으로 엮는 단계일 뿐입니다.
+
 | 항목 | 필요 여부 |
 |---|---|
-| **SR 패널 + SR 런타임** | 필수. Acer SpatialLabs 제품은 **SpatialLabs Experience Center**만 설치하면 됩니다. 64비트 런타임(`C:\Program Files\Acer\SpatialLabs\Platform\bin`), 32비트 런타임(`C:\Program Files (x86)\Simulated Reality\Platform\bin`), SR Service / Eye Tracker 서비스가 함께 설치됩니다. 다른 Leia SR 패널은 그 제품의 SR Platform 런타임을 설치하세요. |
+| **SR 패널 + SR 런타임** | **SR 위빙을 쓸 때만** 필요합니다. 설치기의 디스플레이 단계에서 "SR 위빙 사용"을 끄면 geo-11의 출력 모드(sbs / tab / 인터레이스 등)를 골라 3D TV·편광 모니터 등 다른 3D 디스플레이에서도 쓸 수 있고, 그때는 SR 런타임이 없어도 됩니다. Acer SpatialLabs 제품은 **SpatialLabs Experience Center**만 설치하면 됩니다. 64비트 런타임(`C:\Program Files\Acer\SpatialLabs\Platform\bin`), 32비트 런타임(`C:\Program Files (x86)\Simulated Reality\Platform\bin`), SR Service / Eye Tracker 서비스가 함께 설치됩니다. 다른 Leia SR 패널은 그 제품의 SR Platform 런타임을 설치하세요. |
 | Visual C++ 재배포 패키지 | SRWeave·설치기에는 필요 없습니다(정적 링크). geo-11(3DMigoto 계열)이 VC++ 2015~2022 x64(32비트 게임이면 x86도)를 쓰는데, 게임들이 대부분 깔아 두므로 보통 이미 있습니다. |
 | .NET Framework 4.x | 설치기용. Windows 10/11에 4.8이 기본 포함되어 있습니다. |
 | GPU | 제한 없음. geo-11은 NVIDIA 3D Vision 없이 동작합니다(패키지의 nvapi64.dll은 대체본). |

@@ -38,9 +38,11 @@ ReShade·GameBridge 없이 SRWeave `dxgi.dll` 하나로 동작하고, 64비트·
 
 ## 미리 설치할 것 / Prerequisites
 
+**SR 패널이 아니어도 됩니다.** SR 위빙을 끄면 일반 geo-11 설치기로 동작합니다(출력 모드 선택). SR 위빙은 geo-11 SBS 화면을 렌티큘러 패널용으로 엮는 단계일 뿐입니다.
+
 | 항목 | 필요 여부 |
 |---|---|
-| **SR 패널 + SR 런타임** | 필수. Acer SpatialLabs 제품은 **SpatialLabs Experience Center**만 설치하면 됩니다. 64비트 런타임(`C:\Program Files\Acer\SpatialLabs\Platform\bin`), 32비트 런타임(`C:\Program Files (x86)\Simulated Reality\Platform\bin`), SR Service / Eye Tracker 서비스가 함께 설치됩니다. 다른 Leia SR 패널은 그 제품의 SR Platform 런타임을 설치하세요. |
+| **SR 패널 + SR 런타임** | **SR 위빙을 쓸 때만** 필요합니다. 설치기의 디스플레이 단계에서 "SR 위빙 사용"을 끄면 geo-11의 출력 모드(sbs / tab / 인터레이스 등)를 골라 3D TV·편광 모니터 등 다른 3D 디스플레이에서도 쓸 수 있고, 그때는 SR 런타임이 없어도 됩니다. Acer SpatialLabs 제품은 **SpatialLabs Experience Center**만 설치하면 됩니다. 64비트 런타임(`C:\Program Files\Acer\SpatialLabs\Platform\bin`), 32비트 런타임(`C:\Program Files (x86)\Simulated Reality\Platform\bin`), SR Service / Eye Tracker 서비스가 함께 설치됩니다. 다른 Leia SR 패널은 그 제품의 SR Platform 런타임을 설치하세요. |
 | Visual C++ 재배포 패키지 | SRWeave·설치기에는 필요 없습니다(정적 링크). geo-11(3DMigoto 계열)이 VC++ 2015~2022 x64(32비트 게임이면 x86도)를 쓰는데, 게임들이 대부분 깔아 두므로 보통 이미 있습니다. |
 | .NET Framework 4.x | 설치기용. Windows 10/11에 4.8이 기본 포함되어 있습니다. |
 | GPU | 제한 없음. geo-11은 NVIDIA 3D Vision 없이 동작합니다(패키지의 nvapi64.dll은 대체본). |
@@ -49,7 +51,7 @@ ReShade·GameBridge 없이 SRWeave `dxgi.dll` 하나로 동작하고, 64비트·
 게임은 SR 패널의 원래 해상도(예: 3840×2160)로 전체화면 또는 테두리 없는 창에서 실행해야 무늬가 맞습니다.
 UE4 Universal Fix 2 게임의 `-dx11` 실행 인자는 Steam(시작 옵션)과 Heroic(Epic/GOG) 사용자는 설치기가 넣어 주고, Epic Games Launcher로 직접 실행하면 런처의 실행 인자에 `-dx11`을 직접 넣어야 합니다.
 
-**English.** Only an SR panel with its runtime is required: on Acer SpatialLabs devices installing **SpatialLabs Experience Center** is enough (it brings the 64-bit and 32-bit SR runtime and the SR Service). SRWeave and the installer need no VC++ redistributable (statically linked) and the installer runs on the .NET Framework 4.8 that ships with Windows 10/11. geo-11 itself may need the VC++ 2015–2022 redistributable (x64, plus x86 for 32-bit games), which most games already install. Any GPU works. Run games at the panel's native resolution, fullscreen or borderless. For UE4 Universal Fix 2 games the `-dx11` argument is written into Steam launch options / Heroic by the installer; with the Epic Games Launcher add it to the launch arguments yourself.
+**English.** An SR panel is only needed for the weaving step: turn "Use SR weaving" off in the installer's Display step and it works as a plain geo-11 installer for any other 3D display (pick the output mode: sbs / tab / interlaced ...), with no SR runtime at all. For SR panels: on Acer SpatialLabs devices installing **SpatialLabs Experience Center** is enough (it brings the 64-bit and 32-bit SR runtime and the SR Service). SRWeave and the installer need no VC++ redistributable (statically linked) and the installer runs on the .NET Framework 4.8 that ships with Windows 10/11. geo-11 itself may need the VC++ 2015–2022 redistributable (x64, plus x86 for 32-bit games), which most games already install. Any GPU works. Run games at the panel's native resolution, fullscreen or borderless. For UE4 Universal Fix 2 games the `-dx11` argument is written into Steam launch options / Heroic by the installer; with the Epic Games Launcher add it to the launch arguments yourself.
 
 ## 저장소 구성
 
