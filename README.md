@@ -6,7 +6,7 @@ geo-11 is a 3DMigoto-based stereo 3D driver that renders games side-by-side (SBS
 
 It also works **without** an SR panel: switch SR weaving off and it is a plain geo-11 installer for any other 3D display (SBS, top-bottom, interlaced output).
 
-![installer](geo-11_SR_Installer/screenshot.png)
+![installer](Installer/screenshot.png)
 
 ## Download and install
 
@@ -14,18 +14,18 @@ Download **`geo-11_SR_all-in-one.zip`** from [Releases](../../releases) and unzi
 
 ```
 geo-11_SR\
-  geo-11_SR_Installer\Geo11SRInstaller.exe
-  geo-11 v0.6.109_Unity_Complete_SR\
-  geo-11 v0.6.109_Preferred_SR\
-  UNREAL_Engine_4_UNIVERSAL-FIX_2_SR\
+  Installer\Geo11SRInstaller.exe
+  Unity\
+  Preferred\
+  UE4\
 ```
 
 | Folder | Contents |
 |---|---|
-| `geo-11_SR_Installer\` | GUI installer (English / Korean) and the Korean manual |
-| `geo-11 v0.6.109_Unity_Complete_SR\` | Unity Universal Fix + geo-11 0.6.109 + SRWeave (x64, x32) |
-| `geo-11 v0.6.109_Preferred_SR\` | Generic geo-11 "Preferred" + SRWeave (x64, x32) |
-| `UNREAL_Engine_4_UNIVERSAL-FIX_2_SR\` | Unreal Engine 4 Universal Fix 2 (Win11 build) + SRWeave, 64-bit only. geo-11 updated to 0.6.109; the original 0.6.40 is kept in `ShaderFixes\Geo11_0.6.40` |
+| `Installer\` | GUI installer (English / Korean) and the Korean manual |
+| `Unity\` | Unity Universal Fix + geo-11 0.6.109 + SRWeave (x64, x32) |
+| `Preferred\` | Generic geo-11 "Preferred" + SRWeave (x64, x32) |
+| `UE4\` | Unreal Engine 4 Universal Fix 2 (Win11 build) + SRWeave, 64-bit only. geo-11 updated to 0.6.109; the original 0.6.40 is kept in `ShaderFixes\Geo11_0.6.40` |
 
 Keep the folders side by side: the installer finds the packages by relative path.
 
@@ -59,8 +59,8 @@ Problems? Look at `SRWeave.log` in the game folder.
 
 | Folder | Contents |
 |---|---|
-| [`geo-11_SR_Installer/`](geo-11_SR_Installer/) | GUI installer (C# WinForms, no console window, English / Korean). Source `src\*.cs`, build `src\build.cmd` (Roslyn csc). Korean manual: [`README_KR.md`](geo-11_SR_Installer/README_KR.md) |
-| [`SRWeave_Geo11/`](SRWeave_Geo11/) | SRWeave `dxgi.dll` source (C++, MinHook, SR SDK). `build.ps1 -Arch all` → `bin\x64\dxgi.dll`, `bin\x86\dxgi.dll`. Notes: [`README.md`](SRWeave_Geo11/README.md) (Korean) |
+| [`Installer/`](Installer/) | GUI installer (C# WinForms, no console window, English / Korean). Source `src\*.cs`, build `src\build.cmd` (Roslyn csc). Korean manual: [`README_KR.md`](Installer/README_KR.md) |
+| [`SRWeave/`](SRWeave/) | SRWeave `dxgi.dll` source (C++, MinHook, SR SDK). `build.ps1 -Arch all` → `bin\x64\dxgi.dll`, `bin\x86\dxgi.dll`. Notes: [`README.md`](SRWeave/README.md) (Korean) |
 
 The fix packages are not in the repository (third-party work, size); they are release assets only.
 
@@ -73,8 +73,8 @@ The fix packages are not in the repository (third-party work, size); they are re
 
 ## Building
 
-- Installer: `geo-11_SR_Installer\src\build.cmd` (Roslyn csc from Visual Studio, else the .NET Framework 4 csc). No external libraries.
-- SRWeave: `SRWeave_Geo11\build.ps1 -Arch all` (CMake + MSVC). The SR SDK is not included: take it from an SR Platform installation (or the Leia/SR SDK) and point the `SR_SDK` option in `CMakeLists.txt` at it.
+- Installer: `Installer\src\build.cmd` (Roslyn csc from Visual Studio, else the .NET Framework 4 csc). No external libraries.
+- SRWeave: `SRWeave\build.ps1 -Arch all` (CMake + MSVC). The SR SDK is not included: take it from an SR Platform installation (or the Leia/SR SDK) and point the `SR_SDK` option in `CMakeLists.txt` at it.
 
 ## Verified (2026-10-09)
 
@@ -88,7 +88,7 @@ The fix packages are not in the repository (third-party work, size); they are re
 - **Unity Universal Fix** (Unity_Complete) and **geo-11 Preferred** — as distributed with GameBridge.
 - **Unreal Engine 4 Universal Fix 2** — assembled by LOSTI (helixmod community). This project only adds the SRWeave files, a newer geo-11 and a few ini lines (save key, `-dx11`); the original config tool stays in the package.
 - **SR SDK / SR Platform** — Leia Inc. / Acer SpatialLabs (not included; loaded from the installed runtime).
-- **MinHook** — Tsuda Kageyu, BSD 2-Clause (`SRWeave_Geo11/third_party/minhook`).
+- **MinHook** — Tsuda Kageyu, BSD 2-Clause (`SRWeave/third_party/minhook`).
 
 The code in this repository (installer, SRWeave) is MIT licensed, see `LICENSE`. The packages in the releases belong to their authors and are redistributed for the convenience of SR panel users; if you own one of them and want it removed, open an issue.
 

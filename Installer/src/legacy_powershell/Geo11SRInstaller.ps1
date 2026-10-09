@@ -1,7 +1,7 @@
 ﻿# geo-11 SR 설치기 (GUI) - Unity / 일반 geo-11 패키지를 게임에 설치하고, 선택에 따라 설정 파일을 고친다.
 # 실행: Geo11_SR_Installer.bat (STA PowerShell로 띄움). 패키지 폴더는 이 폴더 옆에 있어야 한다:
-#   ..\geo-11 v0.6.109_Unity_Complete_SR\{x64,x32}
-#   ..\geo-11 v0.6.109_Preferred_SR\{x64,x32}
+#   ..\Unity\{x64,x32}
+#   ..\Preferred\{x64,x32}
 # 고치는 파일: d3dxdm.ini (direct_mode, dm_separation, dm_convergence, dm_auto_convergence),
 #   ShaderFixesDM\hotkeys.ini (Key = ...), d3dx.ini (hunting, toggle_hunting, reload_config, reload_fixes,
 #   Unity include 줄은 UnitySwitch.ps1), SRWeave.ini (weave, swap_eyes, lens, key_*).
@@ -12,8 +12,8 @@ Add-Type -AssemblyName System.Drawing
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $packages = [ordered]@{
-    unity = @{ name = 'Unity (Unity Universal Fix + geo-11)'; dir = (Join-Path $root 'geo-11 v0.6.109_Unity_Complete_SR') }
-    plain = @{ name = '일반 geo-11 (Preferred)';               dir = (Join-Path $root 'geo-11 v0.6.109_Preferred_SR') }
+    unity = @{ name = 'Unity (Unity Universal Fix + geo-11)'; dir = (Join-Path $root 'Unity') }
+    plain = @{ name = '일반 geo-11 (Preferred)';               dir = (Join-Path $root 'Preferred') }
 }
 $unityVers = [ordered]@{ auto = '자동 감지'; '55' = '5.5 이하'; '56' = '5.6'; '2017' = '2017 - 2018'; '2019' = '2019 이상' }
 $directModes = 'sbs', 'sbs_reversed', 'tab', 'tab_reversed', 'interlaced', 'interlaced_reversed', 'checkerboard', 'checkerboard_reversed', 'nvidia_dx11', 'nvidia_dx9', 'katanga_vr'

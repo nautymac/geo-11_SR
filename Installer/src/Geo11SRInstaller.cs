@@ -1,7 +1,7 @@
 // geo-11 SR 설치기 - Unity / 일반 geo-11 패키지를 게임에 설치하고, 탭별 선택에 따라 설정 파일을 고친다.
 // 단일 WinForms exe (.NET Framework 4.x). 패키지 폴더는 exe 폴더 옆에 있어야 한다:
-//   ..\geo-11 v0.6.109_Unity_Complete_SR\{x64,x32}
-//   ..\geo-11 v0.6.109_Preferred_SR\{x64,x32}
+//   ..\Unity\{x64,x32}
+//   ..\Preferred\{x64,x32}
 // 고치는 파일: d3dxdm.ini (direct_mode, dm_separation, dm_convergence, dm_auto_convergence),
 //   ShaderFixesDM\hotkeys.ini (Key = ...), d3dx.ini (hunting, toggle_hunting, reload_config, reload_fixes,
 //   show_original; Unity include 줄은 UnitySwitch.ps1), SRWeave.ini (weave, swap_eyes, lens, key_*).
@@ -620,9 +620,10 @@ namespace Geo11SR
             string exeDir = Path.GetDirectoryName(Application.ExecutablePath);
             root = Path.GetDirectoryName(exeDir);
             pkgDirs = new Dictionary<string, string> {
-                { "unity", Path.Combine(root, "geo-11 v0.6.109_Unity_Complete_SR") },
-                { "plain", Path.Combine(root, "geo-11 v0.6.109_Preferred_SR") },
-                { "ue4",   Path.Combine(root, "UNREAL_Engine_4_UNIVERSAL-FIX_2_SR") },   // x64 only, no x64/x32 subfolders
+                // short folder names; the long names of the first releases are still accepted
+                { "unity", FindPkg(root, "Unity", "geo-11 v0.6.109_Unity_Complete_SR") },
+                { "plain", FindPkg(root, "Preferred", "geo-11 v0.6.109_Preferred_SR") },
+                { "ue4",   FindPkg(root, "UE4", "UNREAL_Engine_4_UNIVERSAL-FIX_2_SR") },   // x64 only, no x64/x32 subfolders
             };
             gamesFile = Path.Combine(exeDir, "games.list");
             Lang.Load(exeDir);   // settings.ini "lang=ko|en", else the Windows display language
@@ -658,6 +659,13 @@ namespace Geo11SR
             UpdateEnabled();
             LoadGameList();
             RefreshGameList();
+        }
+
+        // package folder next to the installer folder: the short name if it exists, else the old long name, else the short name (for messages)
+        static string FindPkg(string root, string shortName, string longName)
+        {
+            string s = Path.Combine(root, shortName), l = Path.Combine(root, longName);
+            return Directory.Exists(s) || !Directory.Exists(l) ? s : l;
         }
 
         // ---- look ------------------------------------------------------------------------------

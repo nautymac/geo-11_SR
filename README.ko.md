@@ -6,7 +6,7 @@ geo-11은 3DMigoto 기반의 입체 3D 드라이버로, 게임을 좌우(SBS) �
 
 **SR 패널이 없어도 쓸 수 있습니다.** SR 위빙을 끄면 일반 geo-11 설치기로 동작해 다른 3D 디스플레이(SBS, 상하, 인터레이스 출력)에 그대로 씁니다.
 
-![installer](geo-11_SR_Installer/screenshot.png)
+![installer](Installer/screenshot.png)
 
 ## 받기와 설치
 
@@ -14,18 +14,18 @@ geo-11은 3DMigoto 기반의 입체 3D 드라이버로, 게임을 좌우(SBS) �
 
 ```
 geo-11_SR\
-  geo-11_SR_Installer\Geo11SRInstaller.exe
-  geo-11 v0.6.109_Unity_Complete_SR\
-  geo-11 v0.6.109_Preferred_SR\
-  UNREAL_Engine_4_UNIVERSAL-FIX_2_SR\
+  Installer\Geo11SRInstaller.exe
+  Unity\
+  Preferred\
+  UE4\
 ```
 
 | 폴더 | 내용 |
 |---|---|
-| `geo-11_SR_Installer\` | GUI 설치기(한국어 / 영어)와 한국어 설명서 |
-| `geo-11 v0.6.109_Unity_Complete_SR\` | Unity Universal Fix + geo-11 0.6.109 + SRWeave (x64, x32) |
-| `geo-11 v0.6.109_Preferred_SR\` | 일반 geo-11 "Preferred" + SRWeave (x64, x32) |
-| `UNREAL_Engine_4_UNIVERSAL-FIX_2_SR\` | Unreal Engine 4 Universal Fix 2 (Win11판) + SRWeave, 64비트 전용. geo-11은 0.6.109로 올렸고 원본 0.6.40은 `ShaderFixes\Geo11_0.6.40`에 보관 |
+| `Installer\` | GUI 설치기(한국어 / 영어)와 한국어 설명서 |
+| `Unity\` | Unity Universal Fix + geo-11 0.6.109 + SRWeave (x64, x32) |
+| `Preferred\` | 일반 geo-11 "Preferred" + SRWeave (x64, x32) |
+| `UE4\` | Unreal Engine 4 Universal Fix 2 (Win11판) + SRWeave, 64비트 전용. geo-11은 0.6.109로 올렸고 원본 0.6.40은 `ShaderFixes\Geo11_0.6.40`에 보관 |
 
 폴더들은 나란히 두세요. 설치기가 패키지를 상대 경로로 찾습니다.
 
@@ -53,14 +53,14 @@ geo-11_SR\
 
 UE4 Universal Fix 2 게임은 `-dx11` 인자로 실행해야 합니다. 설치기가 Steam 시작 옵션(Steam을 잠시 종료했다가 다시 시작)이나 Heroic의 게임 설정(Epic/GOG)에 넣어 줍니다. Epic Games Launcher로 직접 실행하면 런처의 실행 인자에 `-dx11`을 직접 넣으세요. **UE4 설정** 창이 픽스의 명령창 설정 도구를 대신합니다(AA/AO 개선, 강제 전체화면, VSync, HUD 프로필).
 
-문제가 있으면 게임 폴더의 `SRWeave.log`를 보세요. 자세한 설명은 [`geo-11_SR_Installer/README_KR.md`](geo-11_SR_Installer/README_KR.md)에 있습니다.
+문제가 있으면 게임 폴더의 `SRWeave.log`를 보세요. 자세한 설명은 [`Installer/README_KR.md`](Installer/README_KR.md)에 있습니다.
 
 ## 저장소 구성
 
 | 폴더 | 내용 |
 |---|---|
-| [`geo-11_SR_Installer/`](geo-11_SR_Installer/) | GUI 설치기(C# WinForms, 콘솔 창 없음, 한국어 / 영어). 소스 `src\*.cs`, 빌드 `src\build.cmd`(Roslyn csc). 설명서 [`README_KR.md`](geo-11_SR_Installer/README_KR.md) |
-| [`SRWeave_Geo11/`](SRWeave_Geo11/) | SRWeave `dxgi.dll` 소스(C++, MinHook, SR SDK). `build.ps1 -Arch all` → `bin\x64\dxgi.dll`, `bin\x86\dxgi.dll`. 설명 [`README.md`](SRWeave_Geo11/README.md) |
+| [`Installer/`](Installer/) | GUI 설치기(C# WinForms, 콘솔 창 없음, 한국어 / 영어). 소스 `src\*.cs`, 빌드 `src\build.cmd`(Roslyn csc). 설명서 [`README_KR.md`](Installer/README_KR.md) |
+| [`SRWeave/`](SRWeave/) | SRWeave `dxgi.dll` 소스(C++, MinHook, SR SDK). `build.ps1 -Arch all` → `bin\x64\dxgi.dll`, `bin\x86\dxgi.dll`. 설명 [`README.md`](SRWeave/README.md) |
 
 픽스 패키지는 저장소에 없고(제3자 저작물, 용량) 릴리스 첨부로만 제공합니다.
 
@@ -73,8 +73,8 @@ UE4 Universal Fix 2 게임은 `-dx11` 인자로 실행해야 합니다. 설치�
 
 ## 빌드
 
-- 설치기: `geo-11_SR_Installer\src\build.cmd` (Visual Studio의 Roslyn csc, 없으면 .NET Framework 4 csc). 외부 라이브러리 없음.
-- SRWeave: `SRWeave_Geo11\build.ps1 -Arch all` (CMake + MSVC). SR SDK는 포함되어 있지 않습니다. SR Platform 설치본(또는 Leia/SR SDK)에서 가져와 `CMakeLists.txt`의 `SR_SDK` 옵션으로 경로를 주세요.
+- 설치기: `Installer\src\build.cmd` (Visual Studio의 Roslyn csc, 없으면 .NET Framework 4 csc). 외부 라이브러리 없음.
+- SRWeave: `SRWeave\build.ps1 -Arch all` (CMake + MSVC). SR SDK는 포함되어 있지 않습니다. SR Platform 설치본(또는 Leia/SR SDK)에서 가져와 `CMakeLists.txt`의 `SR_SDK` 옵션으로 경로를 주세요.
 
 ## 검증 (2026-10-09)
 
@@ -88,7 +88,7 @@ UE4 Universal Fix 2 게임은 `-dx11` 인자로 실행해야 합니다. 설치�
 - **Unity Universal Fix**(Unity_Complete)와 **geo-11 Preferred** — GameBridge와 함께 배포되는 패키지.
 - **Unreal Engine 4 Universal Fix 2** — LOSTI 제작(helixmod 커뮤니티). 이 프로젝트는 SRWeave 파일, 새 geo-11, ini 몇 줄(저장 키, `-dx11`)만 더했고 원래 설정 도구는 패키지에 그대로 있습니다.
 - **SR SDK / SR Platform** — Leia Inc. / Acer SpatialLabs (포함되지 않음, 설치된 런타임에서 로드).
-- **MinHook** — Tsuda Kageyu, BSD 2-Clause (`SRWeave_Geo11/third_party/minhook`).
+- **MinHook** — Tsuda Kageyu, BSD 2-Clause (`SRWeave/third_party/minhook`).
 
 이 저장소의 코드(설치기, SRWeave)는 MIT 라이선스입니다(`LICENSE`). 릴리스의 패키지는 각 제작자의 것이며 SR 패널 사용자의 편의를 위해 재배포합니다. 제작자가 내리길 원하면 이슈로 알려 주세요.
 

@@ -1,6 +1,6 @@
-# SRWeave_Geo11 — geo-11 SBS를 SR 패널용으로 위빙하는 dxgi.dll
+# SRWeave — geo-11 SBS를 SR 패널용으로 위빙하는 dxgi.dll
 
-UE4 Universal Fix 2 SR판, 그리고 GameBridge 배포본 기반의 `geo-11 v0.6.109_Unity_Complete_SR`·`geo-11 v0.6.109_Preferred_SR`
+UE4 Universal Fix 2 SR판, 그리고 GameBridge 배포본 기반의 `Unity`·`Preferred`
 (x64/x32)에 들어가는 `dxgi.dll`(루트와 `ShaderFixes\SRWeave\`)의 소스다. ReShade 코드는 없고 SR SDK의 `IDX11Weaver1`만 쓴다.
 게임 폴더에서 geo-11(`d3d11.dll`) 옆에 `dxgi.dll`로 놓이고, System32(x64)/SysWOW64(x86) `dxgi.dll`의 export 20개를 모두
 같은 서수로 넘겨준다(5개는 C++, 나머지 15개는 점프 스텁: x64는 `src\dxgi_forward.asm`, x86은 `src\dxgi_forward_x86.cpp`의 naked 함수).
