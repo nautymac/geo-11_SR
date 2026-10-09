@@ -1,0 +1,23 @@
+; Ordinals follow C:\Windows\SysWOW64\dxgi.dll (they differ from the 64-bit dxgi.dll for the three factory functions).
+LIBRARY dxgi
+EXPORTS
+    ApplyCompatResolutionQuirking    @1
+    CompatString                     @2
+    CompatValue                      @3
+    DXGIDumpJournal                  @4
+    PIXBeginCapture                  @5
+    PIXEndCapture                    @6
+    PIXGetCaptureState               @7
+    SetAppCompatStringPointer        @8
+    UpdateHMDEmulationStatus         @9
+    CreateDXGIFactory1               @10
+    CreateDXGIFactory2               @11
+    CreateDXGIFactory                @12
+    DXGID3D10CreateDevice            @13
+    DXGID3D10CreateLayeredDevice     @14
+    DXGID3D10GetLayeredDeviceSize    @15
+    DXGID3D10RegisterLayers          @16
+    DXGIDeclareAdapterRemovalSupport @17
+    DXGIDisableVBlankVirtualization  @18
+    DXGIGetDebugInterface1           @19
+    DXGIReportAdapterConfiguration   @20

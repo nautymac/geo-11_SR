@@ -1,0 +1,19 @@
+# personal / per-machine files of the installer
+geo-11_SR_Installer/games.list
+geo-11_SR_Installer/settings.ini
+geo-11_SR_Installer/*_Geo11SRInstaller.exe
+
+# SRWeave build trees (bin\ keeps the prebuilt dxgi.dll)
+SRWeave_Geo11/build/
+SRWeave_Geo11/build-x86/
+
+# third-party packages (geo-11 by the geo-11 team, Unity Universal Fix, UE4 Universal Fix 2 by LOSTI / helixmod community):
+# not redistributed here - see README for where to get them and how the SR files are added
+geo-11 v0.6.109_Unity_Complete_SR/
+geo-11 v0.6.109_Preferred_SR/
+UNREAL_Engine_4_UNIVERSAL-FIX_2_SR/
+
+# logs / caches
+*.log
+Thumbs.db
+desktop.ini
