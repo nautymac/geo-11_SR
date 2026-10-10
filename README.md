@@ -80,6 +80,7 @@ The fix packages are not in the repository (third-party work, size); they are re
 
 - Unreal Engine 4 (Steel Rats, SPRAWL): gameplay, stereo value save key.
 - Unity (art of rally): weaving, including an sRGB back buffer.
+- Red Faction Guerrilla Re-MARS-tered (32-bit, sRGB back buffer): correct brightness with v0.1.1 (2026-10-11).
 - x64 and x86: hook → SR context → weaver → woven frame in a D3D11 test program.
 - sRGB brightness (2026-10-11): a flat gray (stored 128) read back from the screen stays 128 with UNORM and sRGB back buffers, x64 and x86 (the previous build gave 188 on sRGB back buffers, the washed-out picture seen in Red Faction Guerrilla Re-MARS-tered).
 

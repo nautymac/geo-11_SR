@@ -80,6 +80,7 @@ UE4 Universal Fix 2 게임은 `-dx11` 인자로 실행해야 합니다. 설치�
 
 - Unreal Engine 4 (Steel Rats, SPRAWL): 플레이, 입체 값 저장 키.
 - Unity (art of rally): 위빙(sRGB 백버퍼 포함).
+- Red Faction Guerrilla Re-MARS-tered (32비트, sRGB 백버퍼): v0.1.1에서 밝기 정상 (2026-10-11).
 - x64·x86: D3D11 테스트 프로그램에서 훅 → SR 컨텍스트 → 위버 → 위빙 프레임.
 - sRGB 밝기 (2026-10-11): 평평한 회색(저장값 128)을 화면에서 다시 읽으면 UNORM·sRGB 백버퍼, x64·x86 모두 128 유지(이전 빌드는 sRGB 백버퍼에서 188 — Red Faction Guerrilla Re-MARS-tered에서 보인 밝게 뜬 화면).
 
