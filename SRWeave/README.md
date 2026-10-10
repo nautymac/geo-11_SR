@@ -35,6 +35,17 @@ Unity 게임(art of rally)이 독점 전체화면에서 `R8G8B8A8_UNORM_SRGB`(29
 포맷으로 만든다. 뷰 생성이 실패하면 포맷을 로그에 남기고 그 스왑체인은 건너뛰며(매 프레임 반복 로그 없음), ResizeBuffers 때 다시 시도한다.
 srtest에 `srgb` 인자(DISCARD + UNORM_SRGB 백버퍼)로 재현·검증했다.
 
+### sRGB 백버퍼 밝기 (2026-10-11, Red Faction Guerrilla Re-MARS-tered)
+
+위의 art of rally 수정은 뷰 생성 실패만 고쳤고 감마는 맞추지 않았다. sRGB 백버퍼(29)에서 `srgb=0`(당시 기본)이면 입력 SRV는
+UNORM(디코드 안 함), 백버퍼 RTV는 UNORM_SRGB(쓸 때 인코드)라 **감마가 두 번 인코드**되어 화면이 밝고 떠 보였다
+(RFG Re-MARS-tered, 로그 `view fmt 28 (back buffer fmt 29)`). 반대로 UNORM 백버퍼에서 `srgb=1`이면 어두워졌다.
+지금은 `srgb=auto`(기본)가 SRV를 백버퍼 포맷에 맞추고(`IsSrgbFormat`), 백버퍼 RTV도 SRV와 같은 포맷(`vf`)으로 만든다.
+형제 포맷 RTV가 거부되면 백버퍼의 정확한 포맷으로 만들고 WARNING을 남긴다. `srgb=0/1`은 위빙을 감마 공간/선형 공간 중
+어디서 할지만 정하고, 입출력이 항상 짝이 맞으므로 밝기는 변하지 않는다.
+검증: D3D11 테스트 프로그램(평평한 회색, 저장값 128을 화면에서 다시 읽음). 수정 전 DLL은 sRGB 백버퍼에서 188(밝음),
+수정 후는 x64·x86, UNORM/sRGB 백버퍼, auto/0/1 모두 128.
+
 ### 임시 스왑체인을 만들면 안 되는 이유 (2026-10-03)
 
 처음 판은 srweave처럼 숨은 창에 임시 디바이스+스왑체인을 만들어 Present 주소를 얻었다. geo-11은 그 임시 스왑체인도 감싸고

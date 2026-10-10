@@ -45,7 +45,7 @@ struct Config {
     bool swapEyes = false;   // Ctrl+Alt+S - geo-11 outputs L|R; set if depth looks inverted
     bool lens = true;        // Ctrl+Alt+L - lenticular lens on while weaving
     bool test = false;       // Ctrl+Alt+T - red left / blue right instead of the game
-    bool srgb = false;       // treat 8-bit back buffer as sRGB (weave in linear)
+    int srgb = -1;           // -1 auto: follow the back buffer format (UNORM_SRGB -> sRGB views), 0 force UNORM, 1 force sRGB
     bool log = true;
     int latencyFrames = 1;
     bool diagInput = false;  // log what input the game window thread receives
@@ -126,7 +126,14 @@ void LoadConfig()
     g_cfg.swapEyes = b(L"swap_eyes", false);
     g_cfg.lens = b(L"lens", true);
     g_cfg.test = b(L"test", false);
-    g_cfg.srgb = b(L"srgb", false);
+    {
+        // "auto" is not a number, so read it as a string
+        wchar_t buf[16] = {};
+        GetPrivateProfileStringW(L"SRWeave", L"srgb", L"auto", buf, 16, ini.c_str());
+        if (_wcsicmp(buf, L"1") == 0) g_cfg.srgb = 1;
+        else if (_wcsicmp(buf, L"0") == 0) g_cfg.srgb = 0;
+        else g_cfg.srgb = -1;   // "auto" or anything else
+    }
     g_cfg.log = b(L"log", true);
     g_cfg.latencyFrames = (int)GetPrivateProfileIntW(L"SRWeave", L"latency_frames", 1, ini.c_str());
     g_cfg.diagInput = b(L"diag_input", false);
@@ -139,8 +146,8 @@ void LoadConfig()
     wchar_t exe[MAX_PATH] = {};
     GetModuleFileNameW(nullptr, exe, MAX_PATH);
     Log("=== SRWeave geo-11 (dxgi.dll proxy) in %ls (pid %lu) ===", exe, GetCurrentProcessId());
-    Log("config: weave=%d swap_eyes=%d lens=%d test=%d srgb=%d latency_frames=%d diag_input=%d weaver_hwnd=%d",
-        g_cfg.weave, g_cfg.swapEyes, g_cfg.lens, g_cfg.test, g_cfg.srgb, g_cfg.latencyFrames, g_cfg.diagInput, g_cfg.weaverHwnd);
+    Log("config: weave=%d swap_eyes=%d lens=%d test=%d srgb=%s latency_frames=%d diag_input=%d weaver_hwnd=%d",
+        g_cfg.weave, g_cfg.swapEyes, g_cfg.lens, g_cfg.test, g_cfg.srgb < 0 ? "auto" : g_cfg.srgb ? "1" : "0", g_cfg.latencyFrames, g_cfg.diagInput, g_cfg.weaverHwnd);
     g_cfg.keyWeave = LoadKey(ini, L"key_weave", 'W');
     g_cfg.keySwap = LoadKey(ini, L"key_swap", 'S');
     g_cfg.keyLens = LoadKey(ini, L"key_lens", 'L');
@@ -372,8 +379,15 @@ DXGI_FORMAT TypelessOf(DXGI_FORMAT f)
     }
 }
 
-DXGI_FORMAT ViewFormat(DXGI_FORMAT f, bool srgb)
+bool IsSrgbFormat(DXGI_FORMAT f)
 {
+    return f == DXGI_FORMAT_R8G8B8A8_UNORM_SRGB || f == DXGI_FORMAT_B8G8R8A8_UNORM_SRGB || f == DXGI_FORMAT_B8G8R8X8_UNORM_SRGB;
+}
+
+// srgbMode: -1 auto (match the back buffer), 0 UNORM, 1 UNORM_SRGB
+DXGI_FORMAT ViewFormat(DXGI_FORMAT f, int srgbMode)
+{
+    const bool srgb = srgbMode < 0 ? IsSrgbFormat(f) : srgbMode != 0;
     switch (f) {
     case DXGI_FORMAT_R8G8B8A8_TYPELESS: case DXGI_FORMAT_R8G8B8A8_UNORM: case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
         return srgb ? DXGI_FORMAT_R8G8B8A8_UNORM_SRGB : DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -602,15 +616,19 @@ bool EnsureObjects(ScState& s, ID3D11Texture2D* bb, const D3D11_TEXTURE2D_DESC& 
         s.w = bd.Width; s.h = bd.Height; s.fmt = vf;
         Log("SBS texture %ux%u fmt %d, view fmt %d (back buffer fmt %d, msaa %u)", s.w, s.h, (int)td.Format, (int)vf, (int)bd.Format, bd.SampleDesc.Count);
     }
-    // The back buffer itself is typed: a view must use its own format unless the buffer is typeless.
-    // (Swap chain back buffers also accept the sRGB/non-sRGB sibling, but the exact format always works.)
+    // Output view with the same sRGB-ness as the input view, so the weaver decodes and encodes
+    // gamma the same number of times (an sRGB back buffer with a UNORM input view and an sRGB
+    // output view double-encoded gamma: picture too bright, RFG Re-MARS-tered). Swap chain back
+    // buffers accept the sRGB/non-sRGB sibling view; in auto mode vf is the back buffer's own
+    // format anyway. If the sibling is refused, fall back to the exact back buffer format.
     D3D11_RENDER_TARGET_VIEW_DESC rd = {};
-    rd.Format = TypelessOf(bd.Format) == bd.Format ? vf : bd.Format;
+    rd.Format = vf;
     rd.ViewDimension = bd.SampleDesc.Count > 1 ? D3D11_RTV_DIMENSION_TEXTURE2DMS : D3D11_RTV_DIMENSION_TEXTURE2D;
     HRESULT hr = s.dev->CreateRenderTargetView(bb, &rd, &s.bbRtv);
-    if (FAILED(hr) && rd.Format != vf) {
-        rd.Format = vf;   // last resort: the view format
+    if (FAILED(hr) && vf != bd.Format) {
+        rd.Format = bd.Format;
         hr = s.dev->CreateRenderTargetView(bb, &rd, &s.bbRtv);
+        if (SUCCEEDED(hr)) Log("WARNING: back buffer RTV fmt %d != input view fmt %d - gamma may be off", (int)bd.Format, (int)vf);
     }
     if (FAILED(hr)) {
         if (!s.failed) Log("CreateRenderTargetView(back buffer fmt %d, view fmt %d) failed 0x%08lx - weaving disabled for this swap chain", (int)bd.Format, (int)rd.Format, hr);

@@ -68,7 +68,7 @@ The fix packages are not in the repository (third-party work, size); they are re
 
 1. On the first `CreateDXGIFactory*` call it hooks the real factory's `CreateSwapChain` / `CreateSwapChainForHwnd` with MinHook.
 2. When the game creates its swap chain it hooks the real `Present` / `Present1` / `ResizeBuffers`. After geo-11 has drawn the SBS frame, the weaver runs inside Present.
-3. The SR DLLs are delay-loaded: without the SR runtime only weaving is disabled. sRGB back buffers (typeless copy) and 32-bit games (different dxgi ordinals, `dxgi32.def`) are handled.
+3. The SR DLLs are delay-loaded: without the SR runtime only weaving is disabled. sRGB back buffers (typeless copy; `srgb=auto` matches the input and output views to the back buffer format, so the gamma is not applied twice) and 32-bit games (different dxgi ordinals, `dxgi32.def`) are handled.
 4. Hotkeys and options live in `SRWeave.ini`; the log is `SRWeave.log` next to it.
 
 ## Building
@@ -81,6 +81,7 @@ The fix packages are not in the repository (third-party work, size); they are re
 - Unreal Engine 4 (Steel Rats, SPRAWL): gameplay, stereo value save key.
 - Unity (art of rally): weaving, including an sRGB back buffer.
 - x64 and x86: hook → SR context → weaver → woven frame in a D3D11 test program.
+- sRGB brightness (2026-10-11): a flat gray (stored 128) read back from the screen stays 128 with UNORM and sRGB back buffers, x64 and x86 (the previous build gave 188 on sRGB back buffers, the washed-out picture seen in Red Faction Guerrilla Re-MARS-tered).
 
 ## Credits and license
 

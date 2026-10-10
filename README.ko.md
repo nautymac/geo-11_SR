@@ -68,7 +68,7 @@ UE4 Universal Fix 2 게임은 `-dx11` 인자로 실행해야 합니다. 설치�
 
 1. 첫 `CreateDXGIFactory*` 호출 때 진짜 팩토리의 `CreateSwapChain` / `CreateSwapChainForHwnd`를 MinHook으로 후킹합니다.
 2. 게임이 스왑체인을 만들면 진짜 `Present` / `Present1` / `ResizeBuffers`를 후킹합니다. geo-11이 SBS 프레임을 다 그린 뒤 Present 안에서 위버가 돕니다.
-3. SR DLL은 지연 로드라 SR 런타임이 없으면 위빙만 꺼집니다. sRGB 백버퍼(TYPELESS 복사)와 32비트 게임(dxgi 서수 차이, `dxgi32.def`)도 처리합니다.
+3. SR DLL은 지연 로드라 SR 런타임이 없으면 위빙만 꺼집니다. sRGB 백버퍼(TYPELESS 복사, `srgb=auto`가 입력·출력 뷰를 백버퍼 포맷에 맞춰 감마가 두 번 들어가지 않음)와 32비트 게임(dxgi 서수 차이, `dxgi32.def`)도 처리합니다.
 4. 단축키와 옵션은 `SRWeave.ini`, 로그는 그 옆의 `SRWeave.log`입니다.
 
 ## 빌드
@@ -81,6 +81,7 @@ UE4 Universal Fix 2 게임은 `-dx11` 인자로 실행해야 합니다. 설치�
 - Unreal Engine 4 (Steel Rats, SPRAWL): 플레이, 입체 값 저장 키.
 - Unity (art of rally): 위빙(sRGB 백버퍼 포함).
 - x64·x86: D3D11 테스트 프로그램에서 훅 → SR 컨텍스트 → 위버 → 위빙 프레임.
+- sRGB 밝기 (2026-10-11): 평평한 회색(저장값 128)을 화면에서 다시 읽으면 UNORM·sRGB 백버퍼, x64·x86 모두 128 유지(이전 빌드는 sRGB 백버퍼에서 188 — Red Faction Guerrilla Re-MARS-tered에서 보인 밝게 뜬 화면).
 
 ## 출처와 라이선스
 
