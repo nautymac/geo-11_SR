@@ -418,6 +418,35 @@ namespace Geo11SR
             return "unknown";
         }
 
+        // IMAGE_FILE_LARGE_ADDRESS_AWARE: a 32-bit game without it gets only 2 GB of address space, which dgVoodoo2 at panel
+        // resolution + geo-11's per-eye targets + SRWeave's copy can exhaust (Sine Mora EX: std::bad_alloc ~45 s in).
+        public static bool? IsLargeAddressAware(string exe)
+        {
+            try
+            {
+                byte[] b = new byte[4096];
+                using (var fs = File.OpenRead(exe)) if (fs.Read(b, 0, b.Length) < 64) return null;
+                int pe = BitConverter.ToInt32(b, 0x3C);
+                if (pe <= 0 || pe + 24 > b.Length || b[pe] != 'P' || b[pe + 1] != 'E') return null;
+                return (BitConverter.ToUInt16(b, pe + 22) & 0x20) != 0;
+            }
+            catch { return null; }
+        }
+
+        // sets the flag (the "4GB patch"); the original exe is kept as <exe>.geo11sr_bak. Returns false when already set.
+        public static bool SetLargeAddressAware(string exe)
+        {
+            if (IsLargeAddressAware(exe) != false) return false;
+            string bak = exe + ".geo11sr_bak";
+            if (!File.Exists(bak)) File.Copy(exe, bak);
+            byte[] b = File.ReadAllBytes(exe);
+            int pe = BitConverter.ToInt32(b, 0x3C);
+            ushort ch = (ushort)(BitConverter.ToUInt16(b, pe + 22) | 0x20);
+            b[pe + 22] = (byte)(ch & 0xFF); b[pe + 23] = (byte)(ch >> 8);
+            File.WriteAllBytes(exe, b);
+            return true;
+        }
+
         // Graphics API the exe uses, from its import table (static link) or, failing that, from DLL names in the file
         // (dynamic loading): "DX9", "DX11", "DX12" or null. DX11/DX12 win over DX9 (engines that support both).
         public static string DirectXOf(string exe)
@@ -660,6 +689,7 @@ namespace Geo11SR
         RadioButton rbUnity, rbPlain, rbUe4, rb64, rb32, rbFull, rbSrOnly;
         RadioButton rbKindGeo, rbKindUe4, rbKindDx9; Label lblKindGame, lblKindDetect;   // step 1: geo-11 (Unity / 일반), UE4 Universal Fix 2, or DX9 (dgVoodoo2 + 일반 geo-11)
         ComboBox cbDx9Ver; CheckBox chkDx9Desktop; FlowLayoutPanel rowDx9;
+        CheckBox chkLaa; Label lblLaa;   // 4GB patch for 32-bit exes without LARGE_ADDRESS_AWARE (DX9 kind, optional)
         Label lblEngine, lblUnityVer; FlowLayoutPanel rowEngine, rowUnityVer;
         Panel pnlUe4; CheckBox chkEngineIni; Button btnUe4Tool;
         ComboBox cbUnityVer; Label lblUnityDetected;
@@ -1202,6 +1232,15 @@ namespace Geo11SR
             kindCol.Controls.Add(rowDx9);
             chkDx9Desktop = Check(Lang.T("바탕화면(패널) 해상도로 출력 (dgVoodoo Resolution = desktop) - SR 패널에서 무늬가 맞도록"), true, 24);
             kindCol.Controls.Add(chkDx9Desktop);
+            // optional 4GB patch (LARGE_ADDRESS_AWARE) for a 32-bit exe that lacks it
+            chkLaa = Check(Lang.T("4GB 패치 (실행 파일에 LARGE_ADDRESS_AWARE 플래그) - 원하면 켜세요"), false, 24);
+            kindCol.Controls.Add(chkLaa);
+            lblLaa = Note(Lang.T("32비트 게임은 주소 공간이 2GB뿐이라 dgVoodoo(패널 해상도) + geo-11(양안) + SR 위빙(복사본)을 더하면 메모리 부족으로 죽을 수 있습니다(\"Runtime Error\" 창, std::bad_alloc). 그럴 때 켜세요. 원본 exe는 <exe>.geo11sr_bak으로 보관하고 [전체 제거]가 되돌립니다. Steam '게임 파일 무결성 확인' 뒤에는 다시 적용해야 합니다."));
+            lblLaa.Margin = P(24, 0, 0, 6);
+            kindCol.Controls.Add(lblLaa);
+            var dx9Overlay = new Label { AutoSize = true, ForeColor = Color.FromArgb(160, 90, 0), Margin = P(24, 0, 0, 6), MaximumSize = Sz(640, 0),
+                Text = Lang.T("알아 두기: DX9 게임에서는 화면 오버레이(숫자패드 0)가 표시되지 않습니다 - dgVoodoo 아래에서 geo-11이 오버레이를 만들지 못합니다. 단축키는 모두 동작합니다: Separation/Convergence 조절(Ctrl+F3~F6), 저장(Ctrl+F7), 3D 켜기/끄기(Ctrl+T), SRWeave(Ctrl+Alt+W/S/L/T).") };
+            kindCol.Controls.Add(dx9Overlay);
             p.Controls.Add(kindCol);
             p.Controls.Add(Note(Lang.T("종류에 따라 다음 단계의 항목이 달라집니다. 종류는 서로 다른 패키지이므로 한 게임에 같이 설치하지 마세요.")));
             rbKindGeo.CheckedChanged += (s, e) => { if (rbKindGeo.Checked && rbUe4 != null && rbUe4.Checked) rbPlain.Checked = true; UpdateEnabled(); };
@@ -1555,7 +1594,7 @@ namespace Geo11SR
             // the engine / Unity-version rows belong to the geo-11 group only (DX9 = dgVoodoo2 + plain geo-11, engine fixed)
             if (rowEngine != null) lblEngine.Visible = rowEngine.Visible = lblUnityVer.Visible = rowUnityVer.Visible = !IsUe4Selected && !IsDx9Selected;
             if (IsDx9Selected && rbPlain != null && !rbPlain.Checked) rbPlain.Checked = true;
-            if (rowDx9 != null) { rowDx9.Enabled = IsDx9Selected; chkDx9Desktop.Enabled = IsDx9Selected; }
+            if (rowDx9 != null) { rowDx9.Enabled = IsDx9Selected; chkDx9Desktop.Enabled = IsDx9Selected; lblLaa.Enabled = IsDx9Selected; if (!IsDx9Selected) chkLaa.Checked = false; }
             cbMode.Enabled = !chkSr.Checked;
             if (chkSr.Checked) cbMode.SelectedItem = "sbs";
             lblModeNote.Visible = chkSr.Checked;
@@ -1658,6 +1697,12 @@ namespace Geo11SR
             bool dx9 = uv == null && !rbUe4.Checked && (api == "DX9" || Dx9Ops.Installed(gameDir));
             if (api != null) notes.Add(api);
             rbKindUe4.Checked = rbUe4.Checked; rbKindDx9.Checked = dx9; rbKindGeo.Checked = !rbUe4.Checked && !dx9;
+            // 4GB patch: only meaningful for a 32-bit exe without the flag; off unless the user wants it
+            bool? laa = bits == 32 ? Util.IsLargeAddressAware(exePath) : null;
+            chkLaa.Enabled = laa == false;
+            chkLaa.Checked = false;
+            chkLaa.Text = laa == true ? Lang.T("4GB 패치 - 이미 적용되어 있음") : bits == 64 ? Lang.T("4GB 패치 - 64비트 게임에는 필요 없음") : Lang.T("4GB 패치 (실행 파일에 LARGE_ADDRESS_AWARE 플래그) - 원하면 켜세요");
+            if (laa == false) notes.Add(Lang.T("2GB 주소 공간 (LAA 없음)"));
             if (dx9)
             {
                 string iv = Dx9Ops.InstalledVersion(gameDir, pkgDirs["dx9"], bits ?? 32);
@@ -1755,7 +1800,21 @@ namespace Geo11SR
                     if (!File.Exists(Path.Combine(dir, "SRWeave.ini"))) File.Copy(Path.Combine(src, "SRWeave.ini"), Path.Combine(dir, "SRWeave.ini"));
                     Log(Lang.T("  dxgi.dll + SRWeave.ini 복사 (기존 픽스 유지)"));
                 }
-                if (IsDx9Selected) foreach (var l in Dx9Ops.Install(pkgDirs["dx9"], (string)cbDx9Ver.SelectedItem, rb64.Checked ? 64 : 32, dir, chkDx9Desktop.Checked)) Log(l);
+                if (IsDx9Selected)
+                {
+                    foreach (var l in Dx9Ops.Install(pkgDirs["dx9"], (string)cbDx9Ver.SelectedItem, rb64.Checked ? 64 : 32, dir, chkDx9Desktop.Checked)) Log(l);
+                    Log(Lang.T("  DX9: 화면 오버레이(숫자패드 0)는 dgVoodoo 아래에서 표시되지 않습니다. 단축키(입체 값 조절·저장·3D 켜기/끄기·SRWeave 키)는 모두 동작합니다."));
+                }
+                if (IsDx9Selected && chkLaa.Enabled && chkLaa.Checked)
+                {
+                    // the game's own exe gets modified: ask once more before doing it
+                    var ok = MessageBox.Show(this,
+                        Lang.T("4GB 패치는 게임 실행 파일을 직접 수정합니다 (헤더의 LARGE_ADDRESS_AWARE 플래그).\n\n") + gameExe + Lang.T("\n\n원본은 같은 폴더에 <exe>.geo11sr_bak으로 보관되고 [전체 제거]가 되돌립니다. Steam '게임 파일 무결성 확인' 뒤에는 다시 적용해야 합니다.\n\n지금 패치할까요?"),
+                        Lang.T("4GB 패치"), MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (ok == DialogResult.Yes && Util.SetLargeAddressAware(gameExe))
+                    { Log(Lang.T("  4GB 패치: ") + Path.GetFileName(gameExe) + Lang.T("에 LARGE_ADDRESS_AWARE 설정 (원본 .geo11sr_bak)")); chkLaa.Enabled = false; chkLaa.Checked = false; chkLaa.Text = Lang.T("4GB 패치 - 이미 적용되어 있음"); }
+                    else if (ok != DialogResult.Yes) Log(Lang.T("  4GB 패치: 건너뜀 (사용자가 취소)"));
+                }
                 if (IsUe4Selected && chkEngineIni.Checked && !Ue4Ops.AaAoInstalled(gameExe)) Log(Ue4Ops.InstallAaAo(dir, gameExe, false));
                 if (IsUe4Selected) foreach (var l in Launchers.ApplyDx11(gameExe, this)) Log(l);   // UF2: the game must start with -dx11
                 if (!useSr) RemoveSrFiles(dir, ourDll, true);
@@ -2013,6 +2072,8 @@ namespace Geo11SR
                 Log("----------------------------------------");
                 RemoveSrFiles(gameDir, Path.Combine(SrcDir(), "dxgi.dll"), false);
                 foreach (var l in Dx9Ops.Remove(gameDir)) Log(l);   // dgVoodoo2 (DX9 kind), if present
+                string exeBak = gameExe + ".geo11sr_bak";
+                if (File.Exists(exeBak)) { File.Copy(exeBak, gameExe, true); File.Delete(exeBak); Log(Lang.T("  4GB 패치 되돌림: 원본 exe 복원")); }
                 Util.RunHidden("cmd.exe", "/c \"" + un + "\"", gameDir);
                 string bak = Path.Combine(gameDir, "dxgi.dll.reshade_bak");
                 if (File.Exists(bak)) { File.Copy(bak, Path.Combine(gameDir, "dxgi.dll"), true); File.Delete(bak); Log(Lang.T("  dxgi.dll.reshade_bak → dxgi.dll 복원")); }

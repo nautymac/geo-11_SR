@@ -9,6 +9,10 @@ UE4 Universal Fix 2 SR판, 그리고 GameBridge 배포본 기반의 `Unity`·`Pr
 단축키는 `SRWeave.ini`의 `key_weave`/`key_swap`/`key_lens`/`key_test`로 바꿀 수 있다(Ctrl+Alt 고정; 글자/숫자, F1-F24, NUMPAD0-9,
 VK_ 이름, 0x 16진수, none). 잘못된 값은 로그에 남기고 기본값을 쓴다.
 
+## 진단 옵션
+
+`SRWeave.ini`의 `diag_exceptions=1`은 벡터 예외 처리기로 프로세스 안의 모든 C++ 예외(0xE06D7363)와 치명적 예외(접근 위반 등)를 처음 던져질 때 잡아 `SRWeave.log`에 던진 모듈, 예외 형식(ThrowInfo의 RTTI 이름), `what()`, 모듈 단위 호출 스택을 기록한다. 같은 자리의 같은 형식은 두 번만 전부 기록하고 그 뒤는 세기만 한다(3DMigoto가 `std::map::at`으로 `out_of_range`를 일상적으로 던진다). Sine Mora EX의 크래시가 게임 CRT의 `std::bad_alloc`(2 GB 주소 공간 소진)임을 이걸로 찾았다. `diag_input=1`은 게임 창이 받는 입력 메시지를 기록한다.
+
 ## 동작
 
 1. 첫 `CreateDXGIFactory*` 호출 때 System32 dxgi로 팩토리를 하나 만들어(창 필요 없음) 진짜

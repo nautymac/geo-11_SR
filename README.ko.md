@@ -48,7 +48,7 @@ geo-11_SR\
 ## 설치기 사용법
 
 1. **게임 목록** 탭 → **게임 추가** → 게임 exe 선택.
-2. **종류**: geo-11(Unity 픽스 / 일반), Unreal Engine 4 Universal Fix 2, 또는 **DirectX 9**(dgVoodoo2 + 일반 geo-11, dgVoodoo2 버전 선택). 실행 파일 구조와 임포트 테이블(`d3d9.dll`)로 자동 감지되며 바꿀 수 있습니다. DX9를 고르면 다음 단계는 일반 geo-11로 고정되고 비트는 실행 파일에서 읽습니다(드물지만 64비트 DX9도 됩니다).
+2. **종류**: geo-11(Unity 픽스 / 일반), Unreal Engine 4 Universal Fix 2, 또는 **DirectX 9**(dgVoodoo2 + 일반 geo-11, dgVoodoo2 버전 선택). 실행 파일 구조와 임포트 테이블(`d3d9.dll`)로 자동 감지되며 바꿀 수 있습니다. DX9를 고르면 다음 단계는 일반 geo-11로 고정되고 비트는 실행 파일에서 읽습니다(드물지만 64비트 DX9도 됩니다). DX9 항목에는 선택 사항인 **4GB 패치**(exe에 LARGE_ADDRESS_AWARE 플래그; exe를 고치기 전에 한 번 더 묻습니다)도 있습니다. 32비트 게임은 주소 공간이 2 GB뿐이라 패널 해상도의 dgVoodoo2 + geo-11 양안 렌더타깃 + SRWeave 복사본이 더해지면 메모리가 바닥납니다(Sine Mora EX가 45초쯤 `std::bad_alloc`으로 죽다가 플래그를 켜자 해결). 원본은 `<exe>.geo11sr_bak`으로 보관하고 [전체 제거]가 되돌리며, Steam '게임 파일 무결성 확인'도 원본으로 되돌리니 그 뒤 다시 적용하세요.
 3. **설치**: 비트, Unity 버전, 기존 픽스, 전체 설치 또는 "SR 위빙만 추가".
 4. **디스플레이**: SR 위빙 켬/끔, 좌우 눈 바꾸기, 렌즈, 업스케일. SR 위빙을 끄면 3D 출력 모드(sbs / tab / 인터레이스 등) 선택.
 5. **입체 값**: Separation, Convergence, 자동 수렴. **완료**를 누르면 게임 폴더에 모두 적용됩니다.
@@ -86,7 +86,9 @@ UE4 Universal Fix 2 게임은 `-dx11` 인자로 실행해야 합니다. 설치�
 - Unity (art of rally): 위빙(sRGB 백버퍼 포함).
 - Red Faction Guerrilla Re-MARS-tered (32비트, sRGB 백버퍼): v0.1.1에서 밝기 정상 (2026-10-11).
 - x64·x86: D3D11 테스트 프로그램에서 훅 → SR 컨텍스트 → 위버 → 위빙 프레임.
-- DirectX 9: D3D9 테스트 프로그램에서 dgVoodoo2 2.79.1 → geo-11 0.6.109(x86) → SRWeave 위빙 프레임(2026-10-11). 실제 DX9 게임 플레이는 아직 미검증.
+- DirectX 9: D3D9 테스트 프로그램에서 dgVoodoo2 2.79.1 → geo-11 0.6.109(x86) → SRWeave 위빙 프레임. Sine Mora EX(DX9, 32비트)는 4GB 패치 뒤 3840×2160으로 실행·위빙 확인(2026-10-11).
+
+알려진 제한: dgVoodoo2 아래에서는 geo-11이 화면 오버레이를 만들지 못해(`d3d11_log.txt`의 `Failed to create Overlay`) DX9 게임에서 숫자패드 0 오버레이가 안 나옵니다. 입체와 단축키는 동작합니다. SRWeave의 `SRWeave.ini`에 `diag_exceptions=1`을 두면 게임 안의 모든 C++/치명적 예외(던진 모듈, 형식, 호출 스택)를 기록해 크래시 원인을 찾는 데 쓸 수 있습니다.
 - sRGB 밝기 (2026-10-11): 평평한 회색(저장값 128)을 화면에서 다시 읽으면 UNORM·sRGB 백버퍼, x64·x86 모두 128 유지(이전 빌드는 sRGB 백버퍼에서 188 — Red Faction Guerrilla Re-MARS-tered에서 보인 밝게 뜬 화면).
 
 ## 출처와 라이선스

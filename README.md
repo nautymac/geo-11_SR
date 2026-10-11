@@ -48,7 +48,7 @@ Run games at the panel's native resolution (for example 3840×2160), fullscreen 
 ## Using the installer
 
 1. **Games** tab → **Add game** → pick the game's exe.
-2. **Kind**: geo-11 (Unity fix / generic), Unreal Engine 4 Universal Fix 2, or **DirectX 9** (dgVoodoo2 + generic geo-11, with a dgVoodoo2 version choice). Detected from the exe's folder layout and its import table (`d3d9.dll`); change it if wrong. For DX9 the next step is fixed to generic geo-11 and the bitness comes from the exe (64-bit DX9 is supported, though rare).
+2. **Kind**: geo-11 (Unity fix / generic), Unreal Engine 4 Universal Fix 2, or **DirectX 9** (dgVoodoo2 + generic geo-11, with a dgVoodoo2 version choice). Detected from the exe's folder layout and its import table (`d3d9.dll`); change it if wrong. For DX9 the next step is fixed to generic geo-11 and the bitness comes from the exe (64-bit DX9 is supported, though rare). The DX9 section also has an optional **4GB patch** (LARGE_ADDRESS_AWARE flag on the exe; asks for confirmation before touching the exe): a 32-bit game has only 2 GB of address space and dgVoodoo2 at panel resolution + geo-11's per-eye targets + SRWeave's copy can exhaust it (Sine Mora EX crashed with `std::bad_alloc` after ~45 s until the flag was set). The original is kept as `<exe>.geo11sr_bak` and *Uninstall all* restores it; Steam's *verify integrity* restores the original too, so re-apply afterwards.
 3. **Install**: bits, Unity version, existing fix, full install or "SR weaving only".
 4. **Display**: SR weaving on/off, eye swap, lens, upscaling; with SR weaving off, the 3D output mode (sbs / tab / interlaced …).
 5. **Stereo values**: separation, convergence, auto convergence. **Finish** writes everything to the game folder.
@@ -86,7 +86,9 @@ The fix packages are not in the repository (third-party work, size); they are re
 - Unity (art of rally): weaving, including an sRGB back buffer.
 - Red Faction Guerrilla Re-MARS-tered (32-bit, sRGB back buffer): correct brightness with v0.1.1 (2026-10-11).
 - x64 and x86: hook → SR context → weaver → woven frame in a D3D11 test program.
-- DirectX 9: dgVoodoo2 2.79.1 → geo-11 0.6.109 (x86) → SRWeave woven frame in a D3D9 test program (2026-10-11). Real DX9 games not yet play-tested.
+- DirectX 9: dgVoodoo2 2.79.1 → geo-11 0.6.109 (x86) → SRWeave woven frame in a D3D9 test program; Sine Mora EX (DX9, 32-bit) runs and weaves at 3840×2160 with the 4GB patch (2026-10-11).
+
+Known limitation: under dgVoodoo2, geo-11 cannot create its on-screen overlay (`Failed to create Overlay` in `d3d11_log.txt`), so the NumPad 0 overlay does not show in DX9 games; stereo and the hotkeys still work. SRWeave has a `diag_exceptions=1` option in `SRWeave.ini` that logs every C++ / fatal exception in the game (thrower module, type, call stack) for crash hunting.
 - sRGB brightness (2026-10-11): a flat gray (stored 128) read back from the screen stays 128 with UNORM and sRGB back buffers, x64 and x86 (the previous build gave 188 on sRGB back buffers, the washed-out picture seen in Red Faction Guerrilla Re-MARS-tered).
 
 ## Credits and license

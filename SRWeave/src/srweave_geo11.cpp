@@ -49,6 +49,7 @@ struct Config {
     bool log = true;
     int latencyFrames = 1;
     bool diagInput = false;  // log what input the game window thread receives
+    bool diagExceptions = false;   // log every C++ / fatal exception raised in the process (who throws, type, call stack)
     bool weaverHwnd = true;  // give the weaver the game window (0: nullptr, weaver assumes fullscreen)
     // hotkeys (always Ctrl+Alt + this virtual key; 0 = unbound). SRWeave.ini: key_weave=W, key_swap=S, key_lens=L, key_test=T
     int keyWeave = 'W', keySwap = 'S', keyLens = 'L', keyTest = 'T';
@@ -137,6 +138,7 @@ void LoadConfig()
     g_cfg.log = b(L"log", true);
     g_cfg.latencyFrames = (int)GetPrivateProfileIntW(L"SRWeave", L"latency_frames", 1, ini.c_str());
     g_cfg.diagInput = b(L"diag_input", false);
+    g_cfg.diagExceptions = b(L"diag_exceptions", false);
     g_cfg.weaverHwnd = b(L"weaver_hwnd", true);
     if (g_cfg.log) {
         // overwrite each run: one game session per log
@@ -146,8 +148,8 @@ void LoadConfig()
     wchar_t exe[MAX_PATH] = {};
     GetModuleFileNameW(nullptr, exe, MAX_PATH);
     Log("=== SRWeave geo-11 (dxgi.dll proxy) in %ls (pid %lu) ===", exe, GetCurrentProcessId());
-    Log("config: weave=%d swap_eyes=%d lens=%d test=%d srgb=%s latency_frames=%d diag_input=%d weaver_hwnd=%d",
-        g_cfg.weave, g_cfg.swapEyes, g_cfg.lens, g_cfg.test, g_cfg.srgb < 0 ? "auto" : g_cfg.srgb ? "1" : "0", g_cfg.latencyFrames, g_cfg.diagInput, g_cfg.weaverHwnd);
+    Log("config: weave=%d swap_eyes=%d lens=%d test=%d srgb=%s latency_frames=%d diag_input=%d diag_exceptions=%d weaver_hwnd=%d",
+        g_cfg.weave, g_cfg.swapEyes, g_cfg.lens, g_cfg.test, g_cfg.srgb < 0 ? "auto" : g_cfg.srgb ? "1" : "0", g_cfg.latencyFrames, g_cfg.diagInput, g_cfg.diagExceptions, g_cfg.weaverHwnd);
     g_cfg.keyWeave = LoadKey(ini, L"key_weave", 'W');
     g_cfg.keySwap = LoadKey(ini, L"key_swap", 'S');
     g_cfg.keyLens = LoadKey(ini, L"key_lens", 'L');
@@ -182,6 +184,89 @@ std::string ModuleOf(const void* addr)
     char p[MAX_PATH] = {};
     GetModuleFileNameA(m, p, MAX_PATH);
     return p;
+}
+
+// ---- exception diagnostics (diag_exceptions=1) ---------------------------------------------
+// A vectored handler sees every exception first-chance. MSVC C++ throws are code 0xE06D7363 with
+// ExceptionInformation = { 0x19930520, object, ThrowInfo*, (x64) module base }; the thrown type's name is in
+// ThrowInfo -> CatchableTypeArray -> CatchableType[0] -> TypeDescriptor.name (RVAs on x64, pointers on x86).
+
+const char* ThrownTypeName(const EXCEPTION_RECORD* er)
+{
+    __try {
+        if (er->NumberParameters < 3 || er->ExceptionInformation[0] != 0x19930520) return nullptr;
+        const char* base = nullptr;
+#ifdef _WIN64
+        if (er->NumberParameters < 4) return nullptr;
+        base = (const char*)er->ExceptionInformation[3];
+        auto rva = [&](unsigned r) { return base + r; };
+        const unsigned* ti = (const unsigned*)er->ExceptionInformation[2];          // ThrowInfo: attrs, unwind, fwd, cta (RVAs)
+        const int* cta = (const int*)rva(ti[3]);                                    // CatchableTypeArray: n, arr[] (RVAs)
+        if (cta[0] < 1) return nullptr;
+        const unsigned* ct = (const unsigned*)rva(cta[1]);                          // CatchableType: props, pType (RVA), ...
+        const char* td = rva(ct[1]);                                                // TypeDescriptor: vftable, spare, name
+        return td + 2 * sizeof(void*);
+#else
+        const void** ti = (const void**)er->ExceptionInformation[2];                // attrs, unwind, fwd, cta
+        const int* cta = (const int*)ti[3];
+        if (!cta || cta[0] < 1) return nullptr;
+        const void** ct = (const void**)(size_t)cta[1];
+        const char* td = (const char*)ct[1];
+        return td + 2 * sizeof(void*);
+#endif
+    } __except (EXCEPTION_EXECUTE_HANDLER) { return nullptr; }
+}
+
+// std::exception::what() of the thrown object, if the type looks like one (guarded: the vtable may be anything)
+const char* ThrownWhat(const EXCEPTION_RECORD* er, const char* typeName)
+{
+    __try {
+        if (!typeName || er->NumberParameters < 2 || !er->ExceptionInformation[1]) return nullptr;
+        if (!strstr(typeName, "exception") && !strstr(typeName, "error") && !strstr(typeName, "Exception")) return nullptr;
+        return ((const std::exception*)er->ExceptionInformation[1])->what();
+    } __except (EXCEPTION_EXECUTE_HANDLER) { return nullptr; }
+}
+
+// Some code throws routinely (3DMigoto's std::map::at -> out_of_range, caught internally), so each distinct
+// signature (type + throw site) is logged in full twice and then only counted; a new signature is always logged.
+std::mutex g_excMutex;
+std::map<size_t, int> g_excSeen;
+
+LONG CALLBACK ExceptionLogger(EXCEPTION_POINTERS* ep)
+{
+    const EXCEPTION_RECORD* er = ep->ExceptionRecord;
+    DWORD code = er->ExceptionCode;
+    bool cxx = code == 0xE06D7363;
+    bool fatal = code == EXCEPTION_ACCESS_VIOLATION || code == EXCEPTION_STACK_OVERFLOW || code == EXCEPTION_ILLEGAL_INSTRUCTION || code == EXCEPTION_INT_DIVIDE_BY_ZERO;
+    if (!cxx && !fatal) return EXCEPTION_CONTINUE_SEARCH;
+    const char* type = cxx ? ThrownTypeName(er) : nullptr;
+    void* frames[24] = {};
+    USHORT n = RtlCaptureStackBackTrace(0, 24, frames, nullptr);
+    size_t sig = code;
+    if (type) for (const char* c = type; *c; c++) sig = sig * 31 + (unsigned char)*c;
+    for (USHORT i = 0; i < n && i < 8; i++) sig = sig * 31 + (size_t)frames[i];
+    int count;
+    {
+        std::lock_guard<std::mutex> lk(g_excMutex);
+        count = ++g_excSeen[sig];
+    }
+    if (count > 2) {
+        if (count == 100 || count % 1000 == 0) Log("EXCEPTION 0x%08lX%s%s: repeat #%d (same site)", code, type ? " type=" : "", type ? type : "", count);
+        return EXCEPTION_CONTINUE_SEARCH;
+    }
+    const char* what = cxx ? ThrownWhat(er, type) : nullptr;
+    Log("EXCEPTION 0x%08lX at %p (%s) thread %lu%s%s%s%s [sig %08zx #%d]", code, er->ExceptionAddress, ModuleOf(er->ExceptionAddress).c_str(), GetCurrentThreadId(),
+        type ? " type=" : "", type ? type : "", what ? " what=" : "", what ? what : "", sig, count);
+    std::string last;
+    for (USHORT i = 0; i < n; i++) {
+        std::string m = ModuleOf(frames[i]);
+        size_t sl = m.find_last_of("\\/");
+        std::string name = sl == std::string::npos ? m : m.substr(sl + 1);
+        if (name == last) continue;   // one line per module run, innermost first
+        last = name;
+        Log("    stack[%u] %p %s", i, frames[i], name.c_str());
+    }
+    return EXCEPTION_CONTINUE_SEARCH;
 }
 
 bool AddrInModule(const void* addr, HMODULE m)
@@ -939,6 +1024,7 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID)
         g_self = inst;
         DisableThreadLibraryCalls(inst);
         LoadConfig();
+        if (g_cfg.diagExceptions) { AddVectoredExceptionHandler(1, ExceptionLogger); Log("diag_exceptions: logging C++ / fatal exceptions (first 60)"); }
     }
     return TRUE;
 }
