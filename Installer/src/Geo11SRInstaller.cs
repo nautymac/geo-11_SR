@@ -1230,8 +1230,11 @@ namespace Geo11SR
             rowDx9.Controls.Add(cbDx9Ver);
             rowDx9.Controls.Add(new Label { Text = Lang.T("2.79.1 = 가장 안정적(기본), 2.86.5 / 2.87.3 = 최신"), AutoSize = true, ForeColor = TextMuted, Margin = P(10, 7, 0, 0) });
             kindCol.Controls.Add(rowDx9);
-            chkDx9Desktop = Check(Lang.T("바탕화면(패널) 해상도로 출력 (dgVoodoo Resolution = desktop) - SR 패널에서 무늬가 맞도록"), true, 24);
+            chkDx9Desktop = Check(Lang.T("바탕화면(패널) 해상도로 출력 (Resolution = desktop)"), true, 24);
             kindCol.Controls.Add(chkDx9Desktop);
+            var dx9Res = Note(Lang.T("SR 패널에서 렌티큘러 무늬가 맞으려면 패널 원래 해상도로 출력해야 합니다. 끄면 게임이 고른 해상도 그대로 출력됩니다."));
+            dx9Res.Margin = P(24, 0, 0, 4);
+            kindCol.Controls.Add(dx9Res);
             // optional 4GB patch (LARGE_ADDRESS_AWARE) for a 32-bit exe that lacks it
             chkLaa = Check(Lang.T("4GB 패치 (실행 파일에 LARGE_ADDRESS_AWARE 플래그) - 원하면 켜세요"), false, 24);
             kindCol.Controls.Add(chkLaa);
