@@ -78,7 +78,26 @@ namespace Geo11SR
             return false;
         }
 
-        public static List<string> Install(string pkgDir, string version, int bits, string gameDir, bool desktopRes)
+        public static readonly string[] VramChoices = { "4GB", "2GB" };   // dgVoodoo "VRAM = 4GB"; the default 256 MB makes games crash at panel resolution
+
+        // "4GB" / "2GB" / other value as written in dgVoodoo.conf [DirectX] VRAM, null when there is no conf
+        public static string Vram(string gameDir)
+        {
+            string c = Path.Combine(gameDir, "dgVoodoo.conf");
+            if (!File.Exists(c)) return null;
+            bool inDx = false;
+            foreach (var raw in File.ReadAllLines(c, Encoding.Default))
+            {
+                string l = raw.Trim();
+                if (l.StartsWith("[")) { inDx = l.Equals("[DirectX]", StringComparison.OrdinalIgnoreCase); continue; }
+                if (inDx && l.StartsWith("VRAM", StringComparison.OrdinalIgnoreCase) && l.Contains("=")) return l.Substring(l.IndexOf('=') + 1).Trim();
+            }
+            return null;
+        }
+
+        public static List<string> Install(string pkgDir, string version, int bits, string gameDir, bool desktopRes) { return Install(pkgDir, version, bits, gameDir, desktopRes, VramChoices[0]); }
+
+        public static List<string> Install(string pkgDir, string version, int bits, string gameDir, bool desktopRes, string vram)
         {
             var log = new List<string>();
             string src = Dll(pkgDir, version, bits);
@@ -102,11 +121,13 @@ namespace Geo11SR
                 sb.AppendLine("[DirectX]");
                 sb.AppendLine("; desktop = render at the desktop (SR panel) resolution so the lenticular pattern lines up; unforced = the game's own resolution");
                 sb.AppendLine("Resolution = " + (desktopRes ? "desktop" : "unforced"));
+                sb.AppendLine("; video memory reported to the game; dgVoodoo's default 256 MB is too small at panel resolution and games crash");
+                sb.AppendLine("VRAM = " + (string.IsNullOrEmpty(vram) ? VramChoices[0] : vram));
                 sb.AppendLine("dgVoodooWatermark = false");
                 sb.AppendLine("AppControlledScreenMode = true");
                 sb.AppendLine("DisableAltEnterToToggleScreenMode = true");
                 File.WriteAllText(conf, sb.ToString(), Encoding.ASCII);
-                log.Add(Lang.T("  dgVoodoo.conf 작성 (D3D11 출력, 워터마크 끔, 해상도 ") + (desktopRes ? Lang.T("바탕화면") : Lang.T("게임 설정")) + ")");
+                log.Add(Lang.T("  dgVoodoo.conf 작성 (D3D11 출력, 워터마크 끔, VRAM ") + (string.IsNullOrEmpty(vram) ? VramChoices[0] : vram) + Lang.T(", 해상도 ") + (desktopRes ? Lang.T("바탕화면") : Lang.T("게임 설정")) + ")");
             }
             else log.Add(Lang.T("  dgVoodoo.conf가 이미 있어 그대로 둠 (설치기가 만든 것이 아님)"));
             return log;

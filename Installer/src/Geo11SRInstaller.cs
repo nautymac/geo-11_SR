@@ -688,7 +688,7 @@ namespace Geo11SR
         Label lblGame, lblDetect;
         RadioButton rbUnity, rbPlain, rbUe4, rb64, rb32, rbFull, rbSrOnly;
         RadioButton rbKindGeo, rbKindUe4, rbKindDx9; Label lblKindGame, lblKindDetect;   // step 1: geo-11 (Unity / 일반), UE4 Universal Fix 2, or DX9 (dgVoodoo2 + 일반 geo-11)
-        ComboBox cbDx9Ver; CheckBox chkDx9Desktop; FlowLayoutPanel rowDx9;
+        ComboBox cbDx9Ver, cbDx9Vram; CheckBox chkDx9Desktop; FlowLayoutPanel rowDx9, rowDx9Vram;
         CheckBox chkLaa; Label lblLaa;   // 4GB patch for 32-bit exes without LARGE_ADDRESS_AWARE (DX9 kind, optional)
         Label lblEngine, lblUnityVer; FlowLayoutPanel rowEngine, rowUnityVer;
         Panel pnlUe4; CheckBox chkEngineIni; Button btnUe4Tool;
@@ -1230,6 +1230,12 @@ namespace Geo11SR
             rowDx9.Controls.Add(cbDx9Ver);
             rowDx9.Controls.Add(new Label { Text = Lang.T("2.79.1 = 가장 안정적(기본), 2.86.5 / 2.87.3 = 최신"), AutoSize = true, ForeColor = TextMuted, Margin = P(10, 7, 0, 0) });
             kindCol.Controls.Add(rowDx9);
+            rowDx9Vram = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Margin = P(24, 2, 0, 0) };
+            rowDx9Vram.Controls.Add(new Label { Text = Lang.T("dgVoodoo VRAM:"), AutoSize = true, Margin = P(0, 7, 8, 0) });
+            cbDx9Vram = Combo(90, Dx9Ops.VramChoices, 0);
+            rowDx9Vram.Controls.Add(cbDx9Vram);
+            rowDx9Vram.Controls.Add(new Label { Text = Lang.T("게임에 보고하는 비디오 메모리. 기본값 256MB면 패널 해상도에서 게임이 죽으므로 4GB(또는 2GB)로 둡니다."), AutoSize = true, ForeColor = TextMuted, Margin = P(10, 7, 0, 0), MaximumSize = Sz(400, 0) });
+            kindCol.Controls.Add(rowDx9Vram);
             chkDx9Desktop = Check(Lang.T("바탕화면(패널) 해상도로 출력 (Resolution = desktop)"), true, 24);
             kindCol.Controls.Add(chkDx9Desktop);
             var dx9Res = Note(Lang.T("SR 패널에서 렌티큘러 무늬가 맞으려면 패널 원래 해상도로 출력해야 합니다. 끄면 게임이 고른 해상도 그대로 출력됩니다."));
@@ -1597,7 +1603,7 @@ namespace Geo11SR
             // the engine / Unity-version rows belong to the geo-11 group only (DX9 = dgVoodoo2 + plain geo-11, engine fixed)
             if (rowEngine != null) lblEngine.Visible = rowEngine.Visible = lblUnityVer.Visible = rowUnityVer.Visible = !IsUe4Selected && !IsDx9Selected;
             if (IsDx9Selected && rbPlain != null && !rbPlain.Checked) rbPlain.Checked = true;
-            if (rowDx9 != null) { rowDx9.Enabled = IsDx9Selected; chkDx9Desktop.Enabled = IsDx9Selected; lblLaa.Enabled = IsDx9Selected; if (!IsDx9Selected) chkLaa.Checked = false; }
+            if (rowDx9 != null) { rowDx9.Enabled = IsDx9Selected; rowDx9Vram.Enabled = IsDx9Selected; chkDx9Desktop.Enabled = IsDx9Selected; lblLaa.Enabled = IsDx9Selected; if (!IsDx9Selected) chkLaa.Checked = false; }
             cbMode.Enabled = !chkSr.Checked;
             if (chkSr.Checked) cbMode.SelectedItem = "sbs";
             lblModeNote.Visible = chkSr.Checked;
@@ -1712,6 +1718,8 @@ namespace Geo11SR
                 if (iv != null && cbDx9Ver.Items.Contains(iv)) cbDx9Ver.SelectedItem = iv;
                 var dres = Dx9Ops.DesktopResolution(gameDir);
                 if (dres.HasValue) chkDx9Desktop.Checked = dres.Value;
+                string vr = Dx9Ops.Vram(gameDir);
+                if (vr != null && cbDx9Vram.Items.Contains(vr)) cbDx9Vram.SelectedItem = vr;
             }
             lblKindDetect.Text = Lang.T("자동 감지: ") + (rbUe4.Checked ? Lang.T("Unreal Engine 4 (Binaries\\Win64\\*-Win64-Shipping.exe 구조)") : uv != null ? "Unity " + uv : dx9 ? Lang.T("DirectX 9 (d3d9.dll) → dgVoodoo2 + 일반 geo-11") : Lang.T("Unity 아님 (일반 geo-11)") + (api != null ? " / " + api : "")) + Lang.T(" - 다르면 아래에서 바꾸세요.");
             bool hasFix = File.Exists(Path.Combine(gameDir, "d3d11.dll"));
@@ -1805,7 +1813,7 @@ namespace Geo11SR
                 }
                 if (IsDx9Selected)
                 {
-                    foreach (var l in Dx9Ops.Install(pkgDirs["dx9"], (string)cbDx9Ver.SelectedItem, rb64.Checked ? 64 : 32, dir, chkDx9Desktop.Checked)) Log(l);
+                    foreach (var l in Dx9Ops.Install(pkgDirs["dx9"], (string)cbDx9Ver.SelectedItem, rb64.Checked ? 64 : 32, dir, chkDx9Desktop.Checked, (string)cbDx9Vram.SelectedItem)) Log(l);
                     Log(Lang.T("  DX9: 화면 오버레이(숫자패드 0)는 dgVoodoo 아래에서 표시되지 않습니다. 단축키(입체 값 조절·저장·3D 켜기/끄기·SRWeave 키)는 모두 동작합니다."));
                 }
                 if (IsDx9Selected && chkLaa.Enabled && chkLaa.Checked)

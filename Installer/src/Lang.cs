@@ -274,7 +274,6 @@ namespace Geo11SR
             { "dgVoodoo2 파일이 패키지에 없습니다: ", "dgVoodoo2 file missing from the package: " },
             { "  기존 D3D9.dll(dgVoodoo 아님)을 D3D9.dll.geo11sr_bak으로 보관", "  existing D3D9.dll (not dgVoodoo) kept as D3D9.dll.geo11sr_bak" },
             { "  dgVoodoo2 ", "  dgVoodoo2 " },
-            { "  dgVoodoo.conf 작성 (D3D11 출력, 워터마크 끔, 해상도 ", "  dgVoodoo.conf written (D3D11 output, watermark off, resolution: " },
             { "게임 설정", "game's own" },
             { "  dgVoodoo.conf가 이미 있어 그대로 둠 (설치기가 만든 것이 아님)", "  dgVoodoo.conf already there, left alone (not written by this installer)" },
             { "  dgVoodoo2 D3D9.dll 삭제", "  dgVoodoo2 D3D9.dll deleted" },
@@ -295,6 +294,11 @@ namespace Geo11SR
             { "  4GB 패치 되돌림: 원본 exe 복원", "  4GB patch undone: original exe restored" },
             { "알아 두기: DX9 게임에서는 화면 오버레이(숫자패드 0)가 표시되지 않습니다 - dgVoodoo 아래에서 geo-11이 오버레이를 만들지 못합니다. 단축키는 모두 동작합니다: Separation/Convergence 조절(Ctrl+F3~F6), 저장(Ctrl+F7), 3D 켜기/끄기(Ctrl+T), SRWeave(Ctrl+Alt+W/S/L/T).", "Note: in DX9 games the on-screen overlay (NumPad 0) is not shown - geo-11 cannot create it under dgVoodoo. All hotkeys still work: separation/convergence (Ctrl+F3-F6), save (Ctrl+F7), 3D on/off (Ctrl+T), SRWeave (Ctrl+Alt+W/S/L/T)." },
             { "  DX9: 화면 오버레이(숫자패드 0)는 dgVoodoo 아래에서 표시되지 않습니다. 단축키(입체 값 조절·저장·3D 켜기/끄기·SRWeave 키)는 모두 동작합니다.", "  DX9: the on-screen overlay (NumPad 0) is not shown under dgVoodoo. All hotkeys (stereo values, save, 3D on/off, SRWeave keys) work." },
+            // dgVoodoo VRAM
+            { "dgVoodoo VRAM:", "dgVoodoo VRAM:" },
+            { "게임에 보고하는 비디오 메모리. 기본값 256MB면 패널 해상도에서 게임이 죽으므로 4GB(또는 2GB)로 둡니다.", "Video memory reported to the game. The default 256MB crashes games at panel resolution; keep 4GB (or 2GB)." },
+            { "  dgVoodoo.conf 작성 (D3D11 출력, 워터마크 끔, VRAM ", "  dgVoodoo.conf written (D3D11 output, watermark off, VRAM " },
+            { ", 해상도 ", ", resolution: " },
             // Unreal Engine 4 settings window (replaces the console config tool)
             { "AA/AO 개선 설치 (모션 블러·비네트·렌즈 플레어 끄기, 게임 AA 설정은 그대로)", "Install the AA/AO improvements (motion blur, vignette and lens flare off, game AA settings kept)" },
             { "게임의 설정 폴더(%LOCALAPPDATA%\\<프로젝트>\\Saved\\Config\\WindowsNoEditor)의 Engine.ini와 Scalability.ini 끝에 패키지의 권장 설정을 붙이고 원본은 *_backup.ini로 보관합니다. 게임을 한 번도 실행하지 않아 그 폴더가 없으면 건너뛰고 로그에 남깁니다.", "Appends the package's recommended settings to Engine.ini and Scalability.ini in the game's config folder (%LOCALAPPDATA%\\<Project>\\Saved\\Config\\WindowsNoEditor) and keeps the originals as *_backup.ini. If the game has never run and the folder does not exist, this is skipped and noted in the log." },
