@@ -418,6 +418,69 @@ namespace Geo11SR
             return "unknown";
         }
 
+        // Graphics API the exe uses, from its import table (static link) or, failing that, from DLL names in the file
+        // (dynamic loading): "DX9", "DX11", "DX12" or null. DX11/DX12 win over DX9 (engines that support both).
+        public static string DirectXOf(string exe)
+        {
+            try
+            {
+                var imports = PeImports(exe);
+                bool d9 = imports.Contains("d3d9.dll"), d11 = imports.Contains("d3d11.dll") || imports.Contains("dxgi.dll"), d12 = imports.Contains("d3d12.dll");
+                if (!d9 && !d11 && !d12)
+                {
+                    byte[] b = File.ReadAllBytes(exe);
+                    Func<string, bool> has = s => IndexOf(b, Encoding.ASCII.GetBytes(s)) >= 0 || IndexOf(b, Encoding.Unicode.GetBytes(s)) >= 0;
+                    d9 = has("d3d9.dll"); d11 = has("d3d11.dll") || has("dxgi.dll"); d12 = has("d3d12.dll");
+                }
+                if (d12) return "DX12";
+                if (d11) return "DX11";
+                if (d9) return "DX9";
+            }
+            catch { }
+            return null;
+        }
+
+        static int IndexOf(byte[] hay, byte[] needle)
+        {
+            for (int i = 0; i <= hay.Length - needle.Length; i++)
+            {
+                int j = 0;
+                while (j < needle.Length && (hay[i + j] | 0x20) == (needle[j] | 0x20)) j++;   // case-insensitive for ASCII letters
+                if (j == needle.Length) return i;
+            }
+            return -1;
+        }
+
+        // lower-case names of the DLLs in the PE import table
+        public static HashSet<string> PeImports(string exe)
+        {
+            var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            byte[] b = File.ReadAllBytes(exe);
+            int pe = BitConverter.ToInt32(b, 0x3C);
+            if (pe <= 0 || pe + 24 > b.Length || b[pe] != 'P' || b[pe + 1] != 'E') return names;
+            int opt = pe + 24;
+            bool is64 = BitConverter.ToUInt16(b, opt) == 0x20b;
+            int nsec = BitConverter.ToUInt16(b, pe + 6), so = opt + BitConverter.ToUInt16(b, pe + 20);
+            var secs = new List<int[]>();
+            for (int i = 0; i < nsec; i++) { int s = so + 40 * i; secs.Add(new[] { BitConverter.ToInt32(b, s + 12), BitConverter.ToInt32(b, s + 8), BitConverter.ToInt32(b, s + 20), BitConverter.ToInt32(b, s + 16) }); }
+            Func<int, int> r2o = rva => { foreach (var s in secs) if (rva >= s[0] && rva < s[0] + Math.Max(s[1], s[3])) return s[2] + rva - s[0]; return -1; };
+            int dd = opt + (is64 ? 112 : 96) + 8;   // import directory
+            int irva = BitConverter.ToInt32(b, dd);
+            if (irva == 0) return names;
+            int off = r2o(irva);
+            while (off >= 0 && off + 20 <= b.Length)
+            {
+                int nm = BitConverter.ToInt32(b, off + 12);
+                if (nm == 0) break;
+                int o = r2o(nm);
+                if (o < 0 || o >= b.Length) break;
+                int e = Array.IndexOf(b, (byte)0, o);
+                names.Add(Encoding.ASCII.GetString(b, o, e - o).ToLowerInvariant());
+                off += 20;
+            }
+            return names;
+        }
+
         // Unreal Engine 4 game: the shipping exe lives in <Project>\Binaries\Win64 (or Win32) next to a Content folder
         public static bool IsUe4(string exe)
         {
@@ -595,7 +658,8 @@ namespace Geo11SR
         TabControl tabs;
         Label lblGame, lblDetect;
         RadioButton rbUnity, rbPlain, rbUe4, rb64, rb32, rbFull, rbSrOnly;
-        RadioButton rbKindGeo, rbKindUe4; Label lblKindGame, lblKindDetect;   // step 1: geo-11 (Unity / 일반) or UE4 Universal Fix 2
+        RadioButton rbKindGeo, rbKindUe4, rbKindDx9; Label lblKindGame, lblKindDetect;   // step 1: geo-11 (Unity / 일반), UE4 Universal Fix 2, or DX9 (dgVoodoo2 + 일반 geo-11)
+        ComboBox cbDx9Ver; CheckBox chkDx9Desktop; FlowLayoutPanel rowDx9;
         Label lblEngine, lblUnityVer; FlowLayoutPanel rowEngine, rowUnityVer;
         Panel pnlUe4; CheckBox chkEngineIni; Button btnUe4Tool;
         ComboBox cbUnityVer; Label lblUnityDetected;
@@ -624,6 +688,7 @@ namespace Geo11SR
                 { "unity", FindPkg(root, "Geo-11_Unity", "Unity", "geo-11 v0.6.109_Unity_Complete_SR") },
                 { "plain", FindPkg(root, "Geo-11_DX11", "Preferred", "geo-11 v0.6.109_Preferred_SR") },
                 { "ue4",   FindPkg(root, "Geo-11_UE4", "UE4", "UNREAL_Engine_4_UNIVERSAL-FIX_2_SR") },   // x64 only, no x64/x32 subfolders
+                { "dx9",   FindPkg(root, "Geo-11_DX9") },   // dgVoodoo2 D3D9.dll per version / bitness, used with the "plain" package
             };
             gamesFile = Path.Combine(exeDir, "games.list");
             Lang.Load(exeDir);   // settings.ini "lang=ko|en", else the Windows display language
@@ -987,7 +1052,7 @@ namespace Geo11SR
                 }
                 string dm = Path.Combine(dir, "d3dxdm.ini");
                 bool hasGeo = exists && File.Exists(Path.Combine(dir, "d3d11.dll")) && File.Exists(dm);
-                string engine = !exists ? "-" : (Util.UnityVersion(dir, exe) != null ? "Unity" : Util.IsUe4(exe) ? "UE4" : Lang.T("일반"));
+                string engine = !exists ? "-" : (Util.UnityVersion(dir, exe) != null ? "Unity" : Util.IsUe4(exe) ? "UE4" : Dx9Ops.Installed(dir) ? "DX9" : Lang.T("일반"));
                 var bits = exists ? Util.ExeBits(exe) : null;
                 string sr = "-";
                 if (exists)
@@ -1123,10 +1188,25 @@ namespace Geo11SR
             rbKindUe4.Margin = P(0, 10, 0, 2);
             kindCol.Controls.Add(rbKindUe4);
             kindCol.Controls.Add(Note(Lang.T("UE4 게임 전용(64비트). Universal Fix 2 패키지를 Binaries\\Win64에 설치하고 geo-11 드라이버 배치·HUD 프로필·d3dx.ini 정리를 설치기가 대신합니다. AA/AO 개선, 전체화면, VSync, HUD 프로필은 설치 뒤 [UE4 설정...] 창에서 바꿉니다. 단축키는 d3dxdm.ini에 씁니다.")));
+            rbKindDx9 = Radio(Lang.T("DirectX 9 게임 - dgVoodoo2 + 일반 geo-11"), false);
+            rbKindDx9.Font = new Font(Font, FontStyle.Bold);
+            rbKindDx9.Margin = P(0, 10, 0, 2);
+            kindCol.Controls.Add(rbKindDx9);
+            kindCol.Controls.Add(Note(Lang.T("DX9 게임은 geo-11이 직접 못 다루므로 dgVoodoo2의 D3D9.dll로 D3D11로 변환하고 그 아래에 일반 geo-11(Preferred)과 SR 위빙을 둡니다. 다음 단계의 엔진은 일반 geo-11로 고정되고, 비트는 실행 파일에서 읽습니다(32비트가 대부분, 64비트 DX9도 됨).")));
+            rowDx9 = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Margin = P(24, 2, 0, 0) };
+            rowDx9.Controls.Add(new Label { Text = Lang.T("dgVoodoo2 버전:"), AutoSize = true, Margin = P(0, 7, 8, 0) });
+            var vers = Dx9Ops.Versions(pkgDirs["dx9"]);
+            cbDx9Ver = Combo(120, vers.Length > 0 ? vers : new[] { Dx9Ops.DefaultVersion }, 0);
+            rowDx9.Controls.Add(cbDx9Ver);
+            rowDx9.Controls.Add(new Label { Text = Lang.T("2.79.1 = 가장 안정적(기본), 2.86.5 / 2.87.3 = 최신"), AutoSize = true, ForeColor = TextMuted, Margin = P(10, 7, 0, 0) });
+            kindCol.Controls.Add(rowDx9);
+            chkDx9Desktop = Check(Lang.T("바탕화면(패널) 해상도로 출력 (dgVoodoo Resolution = desktop) - SR 패널에서 무늬가 맞도록"), true, 24);
+            kindCol.Controls.Add(chkDx9Desktop);
             p.Controls.Add(kindCol);
-            p.Controls.Add(Note(Lang.T("종류에 따라 다음 단계의 항목이 달라집니다. 두 종류는 서로 다른 패키지이므로 한 게임에 같이 설치하지 마세요.")));
+            p.Controls.Add(Note(Lang.T("종류에 따라 다음 단계의 항목이 달라집니다. 종류는 서로 다른 패키지이므로 한 게임에 같이 설치하지 마세요.")));
             rbKindGeo.CheckedChanged += (s, e) => { if (rbKindGeo.Checked && rbUe4 != null && rbUe4.Checked) rbPlain.Checked = true; UpdateEnabled(); };
             rbKindUe4.CheckedChanged += (s, e) => { if (rbKindUe4.Checked && rbUe4 != null) rbUe4.Checked = true; UpdateEnabled(); };
+            rbKindDx9.CheckedChanged += (s, e) => { if (rbKindDx9.Checked && rbPlain != null) rbPlain.Checked = true; UpdateEnabled(); };
             return t;
         }
 
@@ -1215,6 +1295,7 @@ namespace Geo11SR
         }
 
         bool IsUe4Selected { get { return rbUe4 != null && rbUe4.Checked; } }
+        bool IsDx9Selected { get { return rbKindDx9 != null && rbKindDx9.Checked; } }
 
         // what 0000_Start_GEO11.cmd does after the package is copied, minus the interactive parts
         void Ue4PostInstall(string dir)
@@ -1471,8 +1552,10 @@ namespace Geo11SR
             cbUnityVer.Enabled = rbUnity.Checked;
             if (IsUe4Selected) { rb64.Checked = true; rb32.Enabled = false; } else rb32.Enabled = true;   // UF2 is 64-bit only
             if (pnlUe4 != null) pnlUe4.Visible = IsUe4Selected;
-            // the engine / Unity-version rows belong to the geo-11 group only
-            if (rowEngine != null) lblEngine.Visible = rowEngine.Visible = lblUnityVer.Visible = rowUnityVer.Visible = !IsUe4Selected;
+            // the engine / Unity-version rows belong to the geo-11 group only (DX9 = dgVoodoo2 + plain geo-11, engine fixed)
+            if (rowEngine != null) lblEngine.Visible = rowEngine.Visible = lblUnityVer.Visible = rowUnityVer.Visible = !IsUe4Selected && !IsDx9Selected;
+            if (IsDx9Selected && rbPlain != null && !rbPlain.Checked) rbPlain.Checked = true;
+            if (rowDx9 != null) { rowDx9.Enabled = IsDx9Selected; chkDx9Desktop.Enabled = IsDx9Selected; }
             cbMode.Enabled = !chkSr.Checked;
             if (chkSr.Checked) cbMode.SelectedItem = "sbs";
             lblModeNote.Visible = chkSr.Checked;
@@ -1570,8 +1653,19 @@ namespace Geo11SR
                 rbPlain.Checked = true; lblUnityDetected.Text = "";
                 notes.Add(Lang.T("Unity 아님 (일반 geo-11)"));
             }
-            rbKindUe4.Checked = rbUe4.Checked; rbKindGeo.Checked = !rbUe4.Checked;
-            lblKindDetect.Text = Lang.T("자동 감지: ") + (rbUe4.Checked ? Lang.T("Unreal Engine 4 (Binaries\\Win64\\*-Win64-Shipping.exe 구조)") : uv != null ? "Unity " + uv : Lang.T("Unity 아님 (일반 geo-11)")) + Lang.T(" - 다르면 아래에서 바꾸세요.");
+            // DirectX 9 (static import or DLL name in the exe) or an existing dgVoodoo2 install -> the DX9 kind
+            string api = Util.DirectXOf(exePath);
+            bool dx9 = uv == null && !rbUe4.Checked && (api == "DX9" || Dx9Ops.Installed(gameDir));
+            if (api != null) notes.Add(api);
+            rbKindUe4.Checked = rbUe4.Checked; rbKindDx9.Checked = dx9; rbKindGeo.Checked = !rbUe4.Checked && !dx9;
+            if (dx9)
+            {
+                string iv = Dx9Ops.InstalledVersion(gameDir, pkgDirs["dx9"], bits ?? 32);
+                if (iv != null && cbDx9Ver.Items.Contains(iv)) cbDx9Ver.SelectedItem = iv;
+                var dres = Dx9Ops.DesktopResolution(gameDir);
+                if (dres.HasValue) chkDx9Desktop.Checked = dres.Value;
+            }
+            lblKindDetect.Text = Lang.T("자동 감지: ") + (rbUe4.Checked ? Lang.T("Unreal Engine 4 (Binaries\\Win64\\*-Win64-Shipping.exe 구조)") : uv != null ? "Unity " + uv : dx9 ? Lang.T("DirectX 9 (d3d9.dll) → dgVoodoo2 + 일반 geo-11") : Lang.T("Unity 아님 (일반 geo-11)") + (api != null ? " / " + api : "")) + Lang.T(" - 다르면 아래에서 바꾸세요.");
             bool hasFix = File.Exists(Path.Combine(gameDir, "d3d11.dll"));
             if (hasFix) { notes.Add(Lang.T("기존 d3d11.dll(geo-11/3DMigoto) 있음 → 'SR 위빙만 추가' 권장")); rbSrOnly.Checked = true; LoadExisting(gameDir); }
             else
@@ -1642,7 +1736,7 @@ namespace Geo11SR
                 if (!File.Exists(ourDll)) throw new Exception(Lang.T("패키지가 없습니다: ") + src + Lang.T("\n이 설치기 폴더 옆에 패키지 폴더가 있어야 합니다."));
                 bool useSr = chkSr.Checked, full = rbFull.Checked;
                 Log("----------------------------------------");
-                Log(Lang.T("적용: ") + (rbUnity.Checked ? "Unity" : IsUe4Selected ? "UE4 UF2" : Lang.T("일반 geo-11")) + " / " + (rb64.Checked ? "x64" : "x32") + " / " + (full ? Lang.T("전체 설치") : Lang.T("SR만 추가")) + " / SR " + (useSr ? Lang.T("사용") : Lang.T("사용 안 함")));
+                Log(Lang.T("적용: ") + (rbUnity.Checked ? "Unity" : IsUe4Selected ? "UE4 UF2" : IsDx9Selected ? "DX9 dgVoodoo2 " + cbDx9Ver.SelectedItem + " + " + Lang.T("일반 geo-11") : Lang.T("일반 geo-11")) + " / " + (rb64.Checked ? "x64" : "x32") + " / " + (full ? Lang.T("전체 설치") : Lang.T("SR만 추가")) + " / SR " + (useSr ? Lang.T("사용") : Lang.T("사용 안 함")));
                 Log(Lang.T("  원본: ") + src);
 
                 if (useSr) BackupReshade(dir, ourDll);
@@ -1661,6 +1755,7 @@ namespace Geo11SR
                     if (!File.Exists(Path.Combine(dir, "SRWeave.ini"))) File.Copy(Path.Combine(src, "SRWeave.ini"), Path.Combine(dir, "SRWeave.ini"));
                     Log(Lang.T("  dxgi.dll + SRWeave.ini 복사 (기존 픽스 유지)"));
                 }
+                if (IsDx9Selected) foreach (var l in Dx9Ops.Install(pkgDirs["dx9"], (string)cbDx9Ver.SelectedItem, rb64.Checked ? 64 : 32, dir, chkDx9Desktop.Checked)) Log(l);
                 if (IsUe4Selected && chkEngineIni.Checked && !Ue4Ops.AaAoInstalled(gameExe)) Log(Ue4Ops.InstallAaAo(dir, gameExe, false));
                 if (IsUe4Selected) foreach (var l in Launchers.ApplyDx11(gameExe, this)) Log(l);   // UF2: the game must start with -dx11
                 if (!useSr) RemoveSrFiles(dir, ourDll, true);
@@ -1917,6 +2012,7 @@ namespace Geo11SR
             {
                 Log("----------------------------------------");
                 RemoveSrFiles(gameDir, Path.Combine(SrcDir(), "dxgi.dll"), false);
+                foreach (var l in Dx9Ops.Remove(gameDir)) Log(l);   // dgVoodoo2 (DX9 kind), if present
                 Util.RunHidden("cmd.exe", "/c \"" + un + "\"", gameDir);
                 string bak = Path.Combine(gameDir, "dxgi.dll.reshade_bak");
                 if (File.Exists(bak)) { File.Copy(bak, Path.Combine(gameDir, "dxgi.dll"), true); File.Delete(bak); Log(Lang.T("  dxgi.dll.reshade_bak → dxgi.dll 복원")); }

@@ -4,6 +4,8 @@
 
 geo-11 is a 3DMigoto-based stereo 3D driver that renders games side-by-side (SBS). This project adds **SRWeave**, a small `dxgi.dll` that hooks the game's real `IDXGISwapChain::Present` and weaves that SBS frame for a lenticular (glasses-free) SR panel such as Acer SpatialLabs or a Leia SR display, using the SR SDK weaver directly. No ReShade, no GameBridge. 64-bit and 32-bit games are supported.
 
+DirectX 9 games are supported through dgVoodoo2 (D3D9 → D3D11) with generic geo-11 underneath.
+
 It also works **without** an SR panel: switch SR weaving off and it is a plain geo-11 installer for any other 3D display (SBS, top-bottom, interlaced output).
 
 ![installer](Installer/screenshot.png)
@@ -18,6 +20,7 @@ geo-11_SR\
   Geo-11_Unity\
   Geo-11_DX11\
   Geo-11_UE4\
+  Geo-11_DX9\
 ```
 
 | Folder | Contents |
@@ -26,6 +29,7 @@ geo-11_SR\
 | `Geo-11_Unity\` | Unity Universal Fix + geo-11 0.6.109 + SRWeave (x64, x32) |
 | `Geo-11_DX11\` | Generic geo-11 "Preferred" + SRWeave (x64, x32) |
 | `Geo-11_UE4\` | Unreal Engine 4 Universal Fix 2 (Win11 build) + SRWeave, 64-bit only. geo-11 updated to 0.6.109; the original 0.6.40 is kept in `ShaderFixes\Geo11_0.6.40` |
+| `Geo-11_DX9\` | dgVoodoo2 `D3D9.dll` (2.79.1 default, 2.86.5, 2.87.3; x86 and x64) for DirectX 9 games, used together with `Geo-11_DX11` |
 
 Keep the folders side by side: the installer finds the packages by relative path.
 
@@ -44,7 +48,7 @@ Run games at the panel's native resolution (for example 3840×2160), fullscreen 
 ## Using the installer
 
 1. **Games** tab → **Add game** → pick the game's exe.
-2. **Kind**: geo-11 (Unity fix / generic) or Unreal Engine 4 Universal Fix 2. Detected from the exe's folder layout; change it if wrong.
+2. **Kind**: geo-11 (Unity fix / generic), Unreal Engine 4 Universal Fix 2, or **DirectX 9** (dgVoodoo2 + generic geo-11, with a dgVoodoo2 version choice). Detected from the exe's folder layout and its import table (`d3d9.dll`); change it if wrong. For DX9 the next step is fixed to generic geo-11 and the bitness comes from the exe (64-bit DX9 is supported, though rare).
 3. **Install**: bits, Unity version, existing fix, full install or "SR weaving only".
 4. **Display**: SR weaving on/off, eye swap, lens, upscaling; with SR weaving off, the 3D output mode (sbs / tab / interlaced …).
 5. **Stereo values**: separation, convergence, auto convergence. **Finish** writes everything to the game folder.
@@ -82,12 +86,14 @@ The fix packages are not in the repository (third-party work, size); they are re
 - Unity (art of rally): weaving, including an sRGB back buffer.
 - Red Faction Guerrilla Re-MARS-tered (32-bit, sRGB back buffer): correct brightness with v0.1.1 (2026-10-11).
 - x64 and x86: hook → SR context → weaver → woven frame in a D3D11 test program.
+- DirectX 9: dgVoodoo2 2.79.1 → geo-11 0.6.109 (x86) → SRWeave woven frame in a D3D9 test program (2026-10-11). Real DX9 games not yet play-tested.
 - sRGB brightness (2026-10-11): a flat gray (stored 128) read back from the screen stays 128 with UNORM and sRGB back buffers, x64 and x86 (the previous build gave 188 on sRGB back buffers, the washed-out picture seen in Red Faction Guerrilla Re-MARS-tered).
 
 ## Credits and license
 
 - **geo-11** — the geo-11 team (DarkStarSword, bo3b, masterotaku and others; 3DMigoto lineage), 3D Vision community / [HelixMod](https://helixmod.blogspot.com/).
 - **Unreal Engine 4 Universal Fix 2** — assembled by LOSTI (helixmod community). This project only adds the SRWeave files, a newer geo-11 and a few ini lines (save key, `-dx11`); the original config tool stays in the package.
+- **dgVoodoo2** — Dege ([dege.freeweb.hu](http://dege.freeweb.hu/)), the D3D9 → D3D11 wrapper used for DirectX 9 games. Redistributed unchanged; the installer only writes a small `dgVoodoo.conf` (D3D11 output, watermark off, desktop resolution).
 - **SR SDK / SR Platform** — Leia Inc. / Acer SpatialLabs (not included; loaded from the installed runtime).
 - **MinHook** — Tsuda Kageyu, BSD 2-Clause (`SRWeave/third_party/minhook`).
 

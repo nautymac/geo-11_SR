@@ -4,6 +4,8 @@
 
 geo-11은 3DMigoto 기반의 입체 3D 드라이버로, 게임을 좌우(SBS) 화면으로 그립니다. 이 프로젝트는 여기에 **SRWeave**를 더합니다. 게임의 진짜 `IDXGISwapChain::Present`를 후킹해 그 SBS 프레임을 SR SDK 위버로 바로 엮어, Acer SpatialLabs나 Leia SR 같은 무안경(렌티큘러) 패널에 보여 주는 작은 `dxgi.dll`입니다. ReShade도 GameBridge도 필요 없습니다. 64비트·32비트 게임을 모두 지원합니다.
 
+DirectX 9 게임은 dgVoodoo2(D3D9 → D3D11 변환)와 그 아래의 일반 geo-11로 지원합니다.
+
 **SR 패널이 없어도 쓸 수 있습니다.** SR 위빙을 끄면 일반 geo-11 설치기로 동작해 다른 3D 디스플레이(SBS, 상하, 인터레이스 출력)에 그대로 씁니다.
 
 ![installer](Installer/screenshot.png)
@@ -18,6 +20,7 @@ geo-11_SR\
   Geo-11_Unity\
   Geo-11_DX11\
   Geo-11_UE4\
+  Geo-11_DX9\
 ```
 
 | 폴더 | 내용 |
@@ -26,6 +29,7 @@ geo-11_SR\
 | `Geo-11_Unity\` | Unity Universal Fix + geo-11 0.6.109 + SRWeave (x64, x32) |
 | `Geo-11_DX11\` | 일반 geo-11 "Preferred" + SRWeave (x64, x32) |
 | `Geo-11_UE4\` | Unreal Engine 4 Universal Fix 2 (Win11판) + SRWeave, 64비트 전용. geo-11은 0.6.109로 올렸고 원본 0.6.40은 `ShaderFixes\Geo11_0.6.40`에 보관 |
+| `Geo-11_DX9\` | DirectX 9 게임용 dgVoodoo2 `D3D9.dll`(2.79.1 기본, 2.86.5, 2.87.3; x86·x64). `Geo-11_DX11`과 함께 씀 |
 
 폴더들은 나란히 두세요. 설치기가 패키지를 상대 경로로 찾습니다.
 
@@ -44,7 +48,7 @@ geo-11_SR\
 ## 설치기 사용법
 
 1. **게임 목록** 탭 → **게임 추가** → 게임 exe 선택.
-2. **종류**: geo-11(Unity 픽스 / 일반) 또는 Unreal Engine 4 Universal Fix 2. 실행 파일 구조로 자동 감지되며 바꿀 수 있습니다.
+2. **종류**: geo-11(Unity 픽스 / 일반), Unreal Engine 4 Universal Fix 2, 또는 **DirectX 9**(dgVoodoo2 + 일반 geo-11, dgVoodoo2 버전 선택). 실행 파일 구조와 임포트 테이블(`d3d9.dll`)로 자동 감지되며 바꿀 수 있습니다. DX9를 고르면 다음 단계는 일반 geo-11로 고정되고 비트는 실행 파일에서 읽습니다(드물지만 64비트 DX9도 됩니다).
 3. **설치**: 비트, Unity 버전, 기존 픽스, 전체 설치 또는 "SR 위빙만 추가".
 4. **디스플레이**: SR 위빙 켬/끔, 좌우 눈 바꾸기, 렌즈, 업스케일. SR 위빙을 끄면 3D 출력 모드(sbs / tab / 인터레이스 등) 선택.
 5. **입체 값**: Separation, Convergence, 자동 수렴. **완료**를 누르면 게임 폴더에 모두 적용됩니다.
@@ -82,12 +86,14 @@ UE4 Universal Fix 2 게임은 `-dx11` 인자로 실행해야 합니다. 설치�
 - Unity (art of rally): 위빙(sRGB 백버퍼 포함).
 - Red Faction Guerrilla Re-MARS-tered (32비트, sRGB 백버퍼): v0.1.1에서 밝기 정상 (2026-10-11).
 - x64·x86: D3D11 테스트 프로그램에서 훅 → SR 컨텍스트 → 위버 → 위빙 프레임.
+- DirectX 9: D3D9 테스트 프로그램에서 dgVoodoo2 2.79.1 → geo-11 0.6.109(x86) → SRWeave 위빙 프레임(2026-10-11). 실제 DX9 게임 플레이는 아직 미검증.
 - sRGB 밝기 (2026-10-11): 평평한 회색(저장값 128)을 화면에서 다시 읽으면 UNORM·sRGB 백버퍼, x64·x86 모두 128 유지(이전 빌드는 sRGB 백버퍼에서 188 — Red Faction Guerrilla Re-MARS-tered에서 보인 밝게 뜬 화면).
 
 ## 출처와 라이선스
 
 - **geo-11** — geo-11 팀(DarkStarSword, bo3b, masterotaku 등, 3DMigoto 계보), 3D Vision 커뮤니티 / [HelixMod](https://helixmod.blogspot.com/).
 - **Unreal Engine 4 Universal Fix 2** — LOSTI 제작(helixmod 커뮤니티). 이 프로젝트는 SRWeave 파일, 새 geo-11, ini 몇 줄(저장 키, `-dx11`)만 더했고 원래 설정 도구는 패키지에 그대로 있습니다.
+- **dgVoodoo2** — Dege([dege.freeweb.hu](http://dege.freeweb.hu/)), DirectX 9 게임에 쓰는 D3D9 → D3D11 래퍼. 그대로 재배포하며 설치기는 작은 `dgVoodoo.conf`(D3D11 출력, 워터마크 끔, 바탕화면 해상도)만 씁니다.
 - **SR SDK / SR Platform** — Leia Inc. / Acer SpatialLabs (포함되지 않음, 설치된 런타임에서 로드).
 - **MinHook** — Tsuda Kageyu, BSD 2-Clause (`SRWeave/third_party/minhook`).
 

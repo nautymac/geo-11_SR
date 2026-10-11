@@ -12,6 +12,7 @@ SRWeave/build-x86/
 Geo-11_Unity/
 Geo-11_DX11/
 Geo-11_UE4/
+Geo-11_DX9/
 
 # logs / caches
 *.log
