@@ -4,7 +4,7 @@
 
 ✅ 잘 됨 · ⚠️ 문제 있음 · ❌ 안 됨. 상태는 보고의 다수결이고, 같으면 최근 보고를 따릅니다.
 
-게임 5개 · 보고 5건 · English: [COMPATIBILITY.md](COMPATIBILITY.md)
+게임 7개 · 보고 7건 · English: [COMPATIBILITY.md](COMPATIBILITY.md)
 
 ## Unity (Universal Fix)
 
@@ -14,6 +14,7 @@ _아직 보고가 없습니다._
 
 | 게임 | 상태 | 보고 | 비트 | 최근 메모 | 이슈 |
 |---|---|---|---|---|---|
+| SPRAWL | ✅ 잘 됨 | ✅ 1 | 64 | Universal Fix 2 with geo-11 0.6.109; separation/convergence save key (Ctrl+F7) works. Starts with -dx11. | [#10](https://github.com/nautymac/geo-11_SR/issues/10) |
 | Steel Rats | ✅ 잘 됨 | ✅ 1 | 64 | Universal Fix 2 with geo-11 0.6.109; starts with -dx11 (the installer sets the Steam launch option). | [#9](https://github.com/nautymac/geo-11_SR/issues/9) |
 
 ## DirectX 9 (dgVoodoo2 + geo-11)
@@ -31,4 +32,6 @@ _아직 보고가 없습니다._
 
 ## DirectX 11 (일반 geo-11)
 
-_아직 보고가 없습니다._
+| 게임 | 상태 | 보고 | 비트 | 최근 메모 | 이슈 |
+|---|---|---|---|---|---|
+| Mega Man 11 | ✅ 잘 됨 | ✅ 1 | 64 | Generic geo-11 (Preferred) + SR weaving. Normal brightness (UNORM back buffer). | [#11](https://github.com/nautymac/geo-11_SR/issues/11) |
