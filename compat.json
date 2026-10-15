@@ -66,28 +66,6 @@
    ]
   },
   {
-   "engine": "OpenGL",
-   "game": "Darkest Dungeon®",
-   "key": "darkestdungeon",
-   "status": "works",
-   "works": 1,
-   "issues": 0,
-   "broken": 0,
-   "updated": "2026-10-15",
-   "bits": [
-    "64"
-   ],
-   "steam": [
-    "262060"
-   ],
-   "exe": [
-    "darkest.exe"
-   ],
-   "reports": [
-    6
-   ]
-  },
-  {
    "engine": "UE4",
    "game": "SPRAWL",
    "key": "sprawl",

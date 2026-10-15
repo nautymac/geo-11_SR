@@ -4,7 +4,7 @@
 
 ✅ 잘 됨 · ⚠️ 문제 있음 · ❌ 안 됨. 상태는 보고의 다수결이고, 같으면 최근 보고를 따릅니다.
 
-게임 7개 · 보고 7건 · English: [COMPATIBILITY.md](COMPATIBILITY.md)
+게임 6개 · 보고 6건 · English: [COMPATIBILITY.md](COMPATIBILITY.md)
 
 ## Unity (Universal Fix)
 
@@ -27,9 +27,7 @@
 
 ## OpenGL (OGL3D)
 
-| 게임 | 상태 | 보고 | 비트 | 최근 메모 | 이슈 |
-|---|---|---|---|---|---|
-| Darkest Dungeon® | ✅ 잘 됨 | ✅ 1 | 64 | Intro cinematic is flat; in-game layers have real depth. Auto convergence. | [#6](https://github.com/nautymac/geo-11_SR/issues/6) |
+_아직 보고가 없습니다._
 
 ## DirectX 11 (일반 geo-11)
 

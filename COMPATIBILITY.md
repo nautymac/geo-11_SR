@@ -4,7 +4,7 @@ Built automatically from user reports, grouped by engine and then by game. Repor
 
 ✅ works well · ⚠️ works with issues · ❌ does not work. The status is the majority of the reports; a tie goes to the newest report.
 
-7 games · 7 reports · 한국어: [COMPATIBILITY.ko.md](COMPATIBILITY.ko.md)
+6 games · 6 reports · 한국어: [COMPATIBILITY.ko.md](COMPATIBILITY.ko.md)
 
 ## Unity (Universal Fix)
 
@@ -27,9 +27,7 @@ Built automatically from user reports, grouped by engine and then by game. Repor
 
 ## OpenGL (OGL3D)
 
-| Game | Status | Reports | Bits | Latest note | Issues |
-|---|---|---|---|---|---|
-| Darkest Dungeon® | ✅ Works well | ✅ 1 | 64 | Intro cinematic is flat; in-game layers have real depth. Auto convergence. | [#6](https://github.com/nautymac/geo-11_SR/issues/6) |
+_No reports yet._
 
 ## DirectX 11 (generic geo-11)
 
