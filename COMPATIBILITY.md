@@ -4,7 +4,7 @@ Built automatically from user reports, grouped by engine and then by game. Repor
 
 ✅ works well · ⚠️ works with issues · ❌ does not work. The status is the majority of the reports; a tie goes to the newest report.
 
-10 games · 10 reports · 한국어: [COMPATIBILITY.ko.md](COMPATIBILITY.ko.md)
+7 games · 7 reports · 한국어: [COMPATIBILITY.ko.md](COMPATIBILITY.ko.md)
 
 ## Unity (Universal Fix)
 
@@ -29,9 +29,6 @@ Built automatically from user reports, grouped by engine and then by game. Repor
 
 | Game | Status | Reports | Bits | Latest note | Issues |
 |---|---|---|---|---|---|
-| Amnesia: The Dark Descent | ✅ Works well | ✅ 1 | 32 | Upscale on for readable UI at 4K, auto convergence. Quit from the in-game menu. | [#4](https://github.com/nautymac/geo-11_SR/issues/4) |
-| Broken Age | ✅ Works well | ✅ 1 | 32 | Needs convergence = auto (depth scale changes per shot). No flicker with OGL3D 1.0.0. | [#5](https://github.com/nautymac/geo-11_SR/issues/5) |
-| Curse of the Dead Gods | ✅ Works well | ✅ 1 | 64 | Depth and HUD depth good, no shader breakage. Manual convergence. | [#3](https://github.com/nautymac/geo-11_SR/issues/3) |
 | Darkest Dungeon® | ✅ Works well | ✅ 1 | 64 | Intro cinematic is flat; in-game layers have real depth. Auto convergence. | [#6](https://github.com/nautymac/geo-11_SR/issues/6) |
 
 ## DirectX 11 (generic geo-11)
