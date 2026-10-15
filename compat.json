@@ -22,6 +22,28 @@
    ]
   },
   {
+   "engine": "DX11",
+   "game": "Red Faction Guerrilla Re-Mars-tered",
+   "key": "redfactionguerrillaremarstered",
+   "status": "works",
+   "works": 1,
+   "issues": 0,
+   "broken": 0,
+   "updated": "2026-10-15",
+   "bits": [
+    "32"
+   ],
+   "steam": [
+    "667720"
+   ],
+   "exe": [
+    "rfg.exe"
+   ],
+   "reports": [
+    13
+   ]
+  },
+  {
    "engine": "OpenGL",
    "game": "Amnesia: The Dark Descent",
    "key": "amnesiathedarkdescent",
@@ -151,6 +173,26 @@
    ],
    "reports": [
     9
+   ]
+  },
+  {
+   "engine": "Unity",
+   "game": "art of rally",
+   "key": "artofrally",
+   "status": "works",
+   "works": 1,
+   "issues": 0,
+   "broken": 0,
+   "updated": "2026-10-15",
+   "bits": [
+    "64"
+   ],
+   "steam": [],
+   "exe": [
+    "artofrally.exe"
+   ],
+   "reports": [
+    12
    ]
   }
  ]

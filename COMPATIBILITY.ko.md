@@ -4,11 +4,13 @@
 
 ✅ 잘 됨 · ⚠️ 문제 있음 · ❌ 안 됨. 상태는 보고의 다수결이고, 같으면 최근 보고를 따릅니다.
 
-게임 7개 · 보고 7건 · English: [COMPATIBILITY.md](COMPATIBILITY.md)
+게임 9개 · 보고 9건 · English: [COMPATIBILITY.md](COMPATIBILITY.md)
 
 ## Unity (Universal Fix)
 
-_아직 보고가 없습니다._
+| 게임 | 상태 | 보고 | 비트 | 최근 메모 | 이슈 |
+|---|---|---|---|---|---|
+| art of rally | ✅ 잘 됨 | ✅ 1 | 64 | Unity Universal Fix; weaving and brightness correct with its sRGB back buffer in exclusive fullscreen. | [#12](https://github.com/nautymac/geo-11_SR/issues/12) |
 
 ## Unreal Engine 4 (Universal Fix 2)
 
@@ -35,3 +37,4 @@ _아직 보고가 없습니다._
 | 게임 | 상태 | 보고 | 비트 | 최근 메모 | 이슈 |
 |---|---|---|---|---|---|
 | Mega Man 11 | ✅ 잘 됨 | ✅ 1 | 64 | Generic geo-11 (Preferred) + SR weaving. Normal brightness (UNORM back buffer). | [#11](https://github.com/nautymac/geo-11_SR/issues/11) |
+| Red Faction Guerrilla Re-Mars-tered | ✅ 잘 됨 | ✅ 1 | 32 | 32-bit; correct brightness with its sRGB back buffer since v0.1.1. | [#13](https://github.com/nautymac/geo-11_SR/issues/13) |
