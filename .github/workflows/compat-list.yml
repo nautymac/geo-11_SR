@@ -1,5 +1,6 @@
 # Rebuilds COMPATIBILITY.md, COMPATIBILITY.ko.md and compat.json from the "3D compatibility report" issues
 # (label: compat) whenever a report is opened, edited, closed, labelled or deleted.
+# A deleted issue always triggers a rebuild (its event payload may carry no labels).
 # Moderation: label a report invalid / duplicate / spam / wontfix, or close it as "not planned", to drop it from the list.
 name: Compatibility list
 
@@ -21,7 +22,8 @@ jobs:
     if: >-
       github.event_name == 'workflow_dispatch' ||
       contains(github.event.issue.labels.*.name, 'compat') ||
-      github.event.action == 'unlabeled'
+      github.event.action == 'unlabeled' ||
+      github.event.action == 'deleted'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
