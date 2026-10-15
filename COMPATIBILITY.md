@@ -4,7 +4,7 @@ Built automatically from user reports, grouped by engine and then by game. Repor
 
 ✅ works well · ⚠️ works with issues · ❌ does not work. The status is the majority of the reports; a tie goes to the newest report.
 
-4 games · 4 reports · 한국어: [COMPATIBILITY.ko.md](COMPATIBILITY.ko.md)
+6 games · 6 reports · 한국어: [COMPATIBILITY.ko.md](COMPATIBILITY.ko.md)
 
 ## Unity (Universal Fix)
 
@@ -12,7 +12,10 @@ _No reports yet._
 
 ## Unreal Engine 4 (Universal Fix 2)
 
-_No reports yet._
+| Game | Status | Reports | Bits | Latest note | Issues |
+|---|---|---|---|---|---|
+| ZZ Test Game A | ✅ Works well | ✅ 1 | 64 | Workflow test report, will be deleted. | [#7](https://github.com/nautymac/geo-11_SR/issues/7) |
+| ZZ Test Game B | ✅ Works well | ✅ 1 | 64 | Workflow test report, will be deleted. | [#8](https://github.com/nautymac/geo-11_SR/issues/8) |
 
 ## DirectX 9 (dgVoodoo2 + geo-11)
 
