@@ -1,4 +1,27 @@
 {
  "version": 1,
- "games": []
+ "games": [
+  {
+   "engine": "UE4",
+   "game": "SPRAWL",
+   "key": "sprawl",
+   "status": "works",
+   "works": 1,
+   "issues": 0,
+   "broken": 0,
+   "updated": "2026-10-15",
+   "bits": [
+    "64"
+   ],
+   "steam": [
+    "1549690"
+   ],
+   "exe": [
+    "sprawl-win64-shipping.exe"
+   ],
+   "reports": [
+    2
+   ]
+  }
+ ]
 }
