@@ -4,7 +4,7 @@
 
 ✅ 잘 됨 · ⚠️ 문제 있음 · ❌ 안 됨. 상태는 보고의 다수결이고, 같으면 최근 보고를 따릅니다.
 
-게임 1개 · 보고 1건 · English: [COMPATIBILITY.md](COMPATIBILITY.md)
+게임 0개 · 보고 0건 · English: [COMPATIBILITY.md](COMPATIBILITY.md)
 
 ## Unity (Universal Fix)
 
@@ -12,9 +12,7 @@ _아직 보고가 없습니다._
 
 ## Unreal Engine 4 (Universal Fix 2)
 
-| 게임 | 상태 | 보고 | 비트 | 최근 메모 | 이슈 |
-|---|---|---|---|---|---|
-| SPRAWL | ✅ 잘 됨 | ✅ 1 | 64 | Workflow test report, will be deleted. | [#2](https://github.com/nautymac/geo-11_SR/issues/2) |
+_아직 보고가 없습니다._
 
 ## DirectX 9 (dgVoodoo2 + geo-11)
 
