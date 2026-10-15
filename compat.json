@@ -44,6 +44,28 @@
    ]
   },
   {
+   "engine": "DX9",
+   "game": "Sine Mora EX",
+   "key": "sinemoraex",
+   "status": "works",
+   "works": 1,
+   "issues": 0,
+   "broken": 0,
+   "updated": "2026-10-15",
+   "bits": [
+    "32"
+   ],
+   "steam": [
+    "606730"
+   ],
+   "exe": [
+    "sinemoraex.exe"
+   ],
+   "reports": [
+    14
+   ]
+  },
+  {
    "engine": "OpenGL",
    "game": "Amnesia: The Dark Descent",
    "key": "amnesiathedarkdescent",

@@ -4,7 +4,7 @@ Built automatically from user reports, grouped by engine and then by game. Repor
 
 ✅ works well · ⚠️ works with issues · ❌ does not work. The status is the majority of the reports; a tie goes to the newest report.
 
-9 games · 9 reports · 한국어: [COMPATIBILITY.ko.md](COMPATIBILITY.ko.md)
+10 games · 10 reports · 한국어: [COMPATIBILITY.ko.md](COMPATIBILITY.ko.md)
 
 ## Unity (Universal Fix)
 
@@ -21,7 +21,9 @@ Built automatically from user reports, grouped by engine and then by game. Repor
 
 ## DirectX 9 (dgVoodoo2 + geo-11)
 
-_No reports yet._
+| Game | Status | Reports | Bits | Latest note | Issues |
+|---|---|---|---|---|---|
+| Sine Mora EX | ✅ Works well | ✅ 1 | 32 | Needs VRAM 4GB and the 4GB patch (else crashes). No NumPad 0 overlay under dgVoodoo; hotkeys work. | [#14](https://github.com/nautymac/geo-11_SR/issues/14) |
 
 ## OpenGL (OGL3D)
 

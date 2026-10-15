@@ -4,7 +4,7 @@
 
 ✅ 잘 됨 · ⚠️ 문제 있음 · ❌ 안 됨. 상태는 보고의 다수결이고, 같으면 최근 보고를 따릅니다.
 
-게임 9개 · 보고 9건 · English: [COMPATIBILITY.md](COMPATIBILITY.md)
+게임 10개 · 보고 10건 · English: [COMPATIBILITY.md](COMPATIBILITY.md)
 
 ## Unity (Universal Fix)
 
@@ -21,7 +21,9 @@
 
 ## DirectX 9 (dgVoodoo2 + geo-11)
 
-_아직 보고가 없습니다._
+| 게임 | 상태 | 보고 | 비트 | 최근 메모 | 이슈 |
+|---|---|---|---|---|---|
+| Sine Mora EX | ✅ 잘 됨 | ✅ 1 | 32 | Needs VRAM 4GB and the 4GB patch (else crashes). No NumPad 0 overlay under dgVoodoo; hotkeys work. | [#14](https://github.com/nautymac/geo-11_SR/issues/14) |
 
 ## OpenGL (OGL3D)
 
