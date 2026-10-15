@@ -88,6 +88,28 @@
    "reports": [
     6
    ]
+  },
+  {
+   "engine": "UE4",
+   "game": "Steel Rats",
+   "key": "steelrats",
+   "status": "works",
+   "works": 1,
+   "issues": 0,
+   "broken": 0,
+   "updated": "2026-10-15",
+   "bits": [
+    "64"
+   ],
+   "steam": [
+    "619700"
+   ],
+   "exe": [
+    "steelrats-win64-shipping.exe"
+   ],
+   "reports": [
+    9
+   ]
   }
  ]
 }
