@@ -39,15 +39,18 @@ RESULT_TEXT = {
 ICON = {"works": "✅", "issues": "⚠️", "broken": "❌"}
 
 
+def api(url, token):
+    req = urllib.request.Request(url, headers={"Accept": "application/vnd.github+json", "User-Agent": "geo-11-sr-compat-list"})
+    if token:
+        req.add_header("Authorization", "Bearer " + token)
+    with urllib.request.urlopen(req) as r:
+        return json.loads(r.read().decode("utf-8"))
+
+
 def fetch_issues(repo, token):
     issues, page = [], 1
     while True:
-        url = "https://api.github.com/repos/%s/issues?labels=compat&state=all&per_page=100&page=%d" % (repo, page)
-        req = urllib.request.Request(url, headers={"Accept": "application/vnd.github+json", "User-Agent": "geo-11-sr-compat-list"})
-        if token:
-            req.add_header("Authorization", "Bearer " + token)
-        with urllib.request.urlopen(req) as r:
-            batch = json.loads(r.read().decode("utf-8"))
+        batch = api("https://api.github.com/repos/%s/issues?labels=compat&state=all&per_page=100&page=%d" % (repo, page), token)
         issues += [i for i in batch if "pull_request" not in i]
         if len(batch) < 100:
             return issues
@@ -208,8 +211,16 @@ def main():
     ap.add_argument("--repo", default=os.environ.get("GITHUB_REPOSITORY", "nautymac/geo-11_SR"))
     ap.add_argument("--out", default=".")
     ap.add_argument("--fixture", help="JSON file with issues (API format) instead of calling GitHub")
-    ap.add_argument("--issue", type=int, default=int(os.environ.get("ISSUE_NUMBER") or 0), help="report the engine of this issue")
+    ap.add_argument("--check", type=int, help="only parse this issue: write listed=true|false and engine= to GITHUB_OUTPUT")
     a = ap.parse_args()
+    gh_out = os.environ.get("GITHUB_OUTPUT")
+    if a.check:
+        r = parse(api("https://api.github.com/repos/%s/issues/%d" % (a.repo, a.check), os.environ.get("GITHUB_TOKEN")))
+        print("issue #%d: %s" % (a.check, "%s / %s / %s" % (r["game"], r["engine"], r["result"]) if r else "not listed (no game or result, or excluded)"))
+        if gh_out:
+            with open(gh_out, "a", encoding="utf-8") as f:
+                f.write("listed=%s\nengine=%s\n" % ("true" if r else "false", r["engine"] if r else ""))
+        return 0
     if a.fixture:
         with open(a.fixture, encoding="utf-8") as f:
             issues = json.load(f)
@@ -224,12 +235,7 @@ def main():
     with open(os.path.join(a.out, "compat.json"), "w", encoding="utf-8", newline="\n") as f:
         json.dump(to_json(games), f, ensure_ascii=False, indent=1)
         f.write("\n")
-    mine = next((r for r in reports if r["number"] == a.issue), None)
     print("%d reports from %d issues, %d games" % (len(reports), len(issues), len(games)))
-    gh_out = os.environ.get("GITHUB_OUTPUT")
-    if gh_out:
-        with open(gh_out, "a", encoding="utf-8") as f:
-            f.write("listed=%s\nengine=%s\n" % ("true" if mine else "false", mine["engine"] if mine else ""))
 
 
 if __name__ == "__main__":
