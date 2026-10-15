@@ -4,7 +4,7 @@
 
 ✅ 잘 됨 · ⚠️ 문제 있음 · ❌ 안 됨. 상태는 보고의 다수결이고, 같으면 최근 보고를 따릅니다.
 
-게임 0개 · 보고 0건 · English: [COMPATIBILITY.md](COMPATIBILITY.md)
+게임 3개 · 보고 3건 · English: [COMPATIBILITY.md](COMPATIBILITY.md)
 
 ## Unity (Universal Fix)
 
@@ -20,7 +20,11 @@ _아직 보고가 없습니다._
 
 ## OpenGL (OGL3D)
 
-_아직 보고가 없습니다._
+| 게임 | 상태 | 보고 | 비트 | 최근 메모 | 이슈 |
+|---|---|---|---|---|---|
+| Amnesia: The Dark Descent | ✅ 잘 됨 | ✅ 1 | 32 | Upscale on for readable UI at 4K, auto convergence. Quit from the in-game menu. | [#4](https://github.com/nautymac/geo-11_SR/issues/4) |
+| Broken Age | ✅ 잘 됨 | ✅ 1 | 32 | Needs convergence = auto (depth scale changes per shot). No flicker with OGL3D 1.0.0. | [#5](https://github.com/nautymac/geo-11_SR/issues/5) |
+| Curse of the Dead Gods | ✅ 잘 됨 | ✅ 1 | 64 | Depth and HUD depth good, no shader breakage. Manual convergence. | [#3](https://github.com/nautymac/geo-11_SR/issues/3) |
 
 ## DirectX 11 (일반 geo-11)
 
