@@ -59,6 +59,14 @@ UE4 Universal Fix 2 games must start with `-dx11`. The installer writes it into 
 
 Problems? Look at `SRWeave.log` in the game folder.
 
+## Compatibility list
+
+[COMPATIBILITY.md](COMPATIBILITY.md) lists how games work in 3D according to user reports, grouped by engine and then by game. A GitHub Action rebuilds it whenever a report is filed, edited or removed.
+
+- **Report a game:** select it in the installer's game list and press **Report 3D...**. The browser opens the [report form](https://github.com/nautymac/geo-11_SR/issues/new?template=compat_report.yml) with the game, engine and setup filled in. Pick the result and submit. A GitHub account is needed, and no folder paths are sent. Without the installer, open the form directly.
+- **In the installer:** the game list's **3D report** column shows the listed status (Works, Issues or Doesn't work, with the number of reports). The report button is off for games that are already listed.
+- **Moderation:** a report labelled `invalid`, `duplicate`, `spam` or `wontfix`, or closed as *not planned*, drops out of the list.
+
 ## Repository layout
 
 | Folder | Contents |

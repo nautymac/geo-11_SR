@@ -40,6 +40,13 @@ UE4 Universal Fix 2 게임의 `-dx11` 실행 인자는 Steam(시작 옵션)과 H
 
 창 아래 오른쪽에 **HelixMod 블로그**(https://helixmod.blogspot.com/)와 **3D Vision Discord** 링크가 있습니다. 주소는 exe 옆 `settings.ini`의 `helixmod=`, `discord=`로 바꿀 수 있고(비우면 숨김), Discord는 만료 없는 초대 링크를 넣으세요. 기본 Discord 주소는 https://discord.gg/zTnnMrA4GE 입니다.
 
+## 3D 동작 보고와 호환 목록
+
+- **[3D 동작 보고...]** (게임 목록): GitHub 보고 양식을 브라우저로 엽니다. 게임 이름(Steam/Heroic 이름), 엔진, 설정 요약(exe 이름, 비트, 스토어, geo-11/dgVoodoo/OGL3D 버전, SR 위빙, 업스케일, Sep/Conv, Windows, GPU)이 채워집니다. 결과(잘 됨 / 문제 있음 / 안 됨)를 고르고 제출하면 GitHub Action이 `COMPATIBILITY.md` / `COMPATIBILITY.ko.md` / `compat.json`을 엔진별·게임별로 다시 만듭니다. 폴더 경로는 넣지 않습니다.
+- **3D 보고 열**: 설치기가 시작할 때(그리고 [새로 고침] 때) `compat.json`을 받아 게임마다 가능 / 문제 있음 / 안 됨과 보고 수를 보여 줍니다. Steam AppID, exe 이름, 게임 이름 순으로 맞춥니다. 받은 목록은 설치기 옆 `compat.json`에 저장되어 오프라인에서도 보입니다.
+- 이미 목록에 있는 게임은 [3D 동작 보고...] 버튼이 꺼집니다. 픽스를 설치하지 않은 게임은 보고할 수 없습니다.
+- 주소 바꾸기 (settings.ini): `compat_list=` (상태 표시줄 [호환 게임 목록] 링크), `compat_json=`, `report=`.
+
 ## 언어 / Language
 
 한국어와 영어를 지원합니다. Windows 표시 언어가 한국어면 한국어, 아니면 영어로 시작하고, 창 오른쪽 위의 "English로 바꾸기 / Switch to 한국어"로 바로 바꿀 수 있습니다. 선택은 exe 옆 `settings.ini`(`lang=ko` 또는 `lang=en`)에 저장됩니다. 설정 파일에 쓰는 값(ini 키, 키 표기)은 언어와 무관합니다.

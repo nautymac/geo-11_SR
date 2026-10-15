@@ -15,6 +15,7 @@ Geo-11_UE4/
 Geo-11_DX9/
 
 # logs / caches
+Installer/compat.json
 *.log
 Thumbs.db
 desktop.ini

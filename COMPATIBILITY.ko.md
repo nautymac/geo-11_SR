@@ -1,0 +1,27 @@
+# 3D 호환 목록
+
+사용자 보고로 자동으로 만들어지는 목록입니다. 엔진별, 게임별로 정리합니다. 보고는 설치기의 **[3D 동작 보고...]** 버튼이나 [보고 양식](https://github.com/nautymac/geo-11_SR/issues/new?template=compat_report.yml)으로 합니다.
+
+✅ 잘 됨 · ⚠️ 문제 있음 · ❌ 안 됨. 상태는 보고의 다수결이고, 같으면 최근 보고를 따릅니다.
+
+게임 0개 · 보고 0건 · English: [COMPATIBILITY.md](COMPATIBILITY.md)
+
+## Unity (Universal Fix)
+
+_아직 보고가 없습니다._
+
+## Unreal Engine 4 (Universal Fix 2)
+
+_아직 보고가 없습니다._
+
+## DirectX 9 (dgVoodoo2 + geo-11)
+
+_아직 보고가 없습니다._
+
+## OpenGL (OGL3D)
+
+_아직 보고가 없습니다._
+
+## DirectX 11 (일반 geo-11)
+
+_아직 보고가 없습니다._

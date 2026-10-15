@@ -1,0 +1,47 @@
+name: 3D compatibility report / 3D 동작 보고
+description: Tell others how a game works in 3D with geo-11 SR / 게임이 geo-11 SR로 3D가 되는지 알려 주세요
+title: "[3D] "
+labels: ["compat"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The installer's **[Report 3D...]** button fills in the game, engine and setup. Pick the result and submit. The report then appears in the [compatibility list](https://github.com/nautymac/geo-11_SR/blob/master/COMPATIBILITY.md), grouped by engine and game, within a minute or two.
+
+        설치기의 **[3D 동작 보고...]** 버튼을 누르면 게임, 엔진, 설정이 채워집니다. 결과를 고르고 제출하면 1~2분 안에 엔진별·게임별 [호환 목록](https://github.com/nautymac/geo-11_SR/blob/master/COMPATIBILITY.ko.md)에 들어갑니다.
+  - type: input
+    id: game
+    attributes:
+      label: Game / 게임
+      description: Steam name if possible / 가능하면 Steam에 표시되는 이름
+    validations:
+      required: true
+  - type: input
+    id: engine
+    attributes:
+      label: Engine / 엔진
+      description: "One of / 다음 중 하나: Unity, UE4, DX11, DX9, OpenGL"
+      placeholder: DX11
+    validations:
+      required: true
+  - type: dropdown
+    id: result
+    attributes:
+      label: Result / 결과
+      options:
+        - Works well / 잘 됨
+        - Works with issues / 문제 있음
+        - Does not work / 안 됨
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Setup / 설정 정보
+      description: Filled in by the installer. Without it, write the fix kind, 32/64-bit and versions. / 설치기가 채웁니다. 직접 쓸 때는 픽스 종류, 32/64비트, 버전을 적어 주세요.
+      render: text
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes / 메모
+      description: Settings that worked, known problems, GPU, display. / 잘 맞은 설정값, 알려진 문제, GPU, 디스플레이 등.

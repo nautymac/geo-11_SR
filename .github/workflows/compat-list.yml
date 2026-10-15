@@ -1,0 +1,54 @@
+# Rebuilds COMPATIBILITY.md, COMPATIBILITY.ko.md and compat.json from the "3D compatibility report" issues
+# (label: compat) whenever a report is opened, edited, closed, labelled or deleted.
+# Moderation: label a report invalid / duplicate / spam / wontfix, or close it as "not planned", to drop it from the list.
+name: Compatibility list
+
+on:
+  issues:
+    types: [opened, edited, closed, reopened, labeled, unlabeled, deleted]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: compat-list
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.issue.labels.*.name, 'compat') ||
+      github.event.action == 'unlabeled'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build the list from the reports
+        id: build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: python3 .github/scripts/compat_list.py --out .
+
+      - name: Commit the list
+        run: |
+          git add COMPATIBILITY.md COMPATIBILITY.ko.md compat.json
+          if git diff --cached --quiet; then echo "list unchanged"; exit 0; fi
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "Update compatibility list"
+          git pull --rebase
+          git push
+
+      - name: Thank the reporter
+        if: github.event.action == 'opened' && steps.build.outputs.listed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ENGINE: ${{ steps.build.outputs.engine }}
+        run: |
+          base="https://github.com/$GITHUB_REPOSITORY/blob/master"
+          gh issue comment "$ISSUE_NUMBER" -R "$GITHUB_REPOSITORY" --body "Thanks for the report! It is now in the [3D compatibility list]($base/COMPATIBILITY.md) under **$ENGINE**. If the game, engine or result is wrong, edit this issue and the list follows.
+
+          보고 감사합니다! [3D 호환 목록]($base/COMPATIBILITY.ko.md)의 **$ENGINE** 항목에 들어갔습니다. 게임, 엔진, 결과가 틀렸으면 이 이슈를 수정하면 목록도 따라 바뀝니다."

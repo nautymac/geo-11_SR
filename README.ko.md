@@ -59,6 +59,14 @@ UE4 Universal Fix 2 게임은 `-dx11` 인자로 실행해야 합니다. 설치�
 
 문제가 있으면 게임 폴더의 `SRWeave.log`를 보세요. 자세한 설명은 [`Installer/README_KR.md`](Installer/README_KR.md)에 있습니다.
 
+## 호환 목록
+
+[COMPATIBILITY.ko.md](COMPATIBILITY.ko.md)는 사용자 보고로 만든 3D 동작 목록입니다. 엔진별, 게임별로 정리합니다. 보고가 올라오거나 수정·삭제되면 GitHub Action이 목록을 다시 만듭니다.
+
+- **보고하기:** 설치기의 게임 목록에서 게임을 고르고 **3D 동작 보고...** 를 누릅니다. 브라우저에 [보고 양식](https://github.com/nautymac/geo-11_SR/issues/new?template=compat_report.yml)이 열리고 게임, 엔진, 설정 정보가 채워져 있습니다. 결과를 고르고 제출하면 됩니다. GitHub 계정이 필요하고, 폴더 경로는 보내지 않습니다. 설치기 없이도 양식을 직접 열어 보고할 수 있습니다.
+- **설치기에서:** 게임 목록의 **3D 보고** 열에 목록의 상태가 나옵니다 (가능, 문제 있음, 안 됨과 보고 수). 이미 목록에 있는 게임은 보고 버튼이 꺼집니다.
+- **관리:** 보고에 `invalid`, `duplicate`, `spam`, `wontfix` 라벨을 붙이거나 *not planned*로 닫으면 목록에서 빠집니다.
+
 ## 저장소 구성
 
 | 폴더 | 내용 |
