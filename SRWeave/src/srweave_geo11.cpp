@@ -322,6 +322,52 @@ int DelayLoadFilter(unsigned code)
            ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH;
 }
 
+#ifndef _WIN64
+// The 32-bit SR runtime (DimencoWeaving32.dll, found while creating the weaver) checks for Microsoft Virtual PC by
+// running the "vpcext" instruction 0F 3F 07 0B under its own SEH frame: on a real PC it faults with an illegal
+// instruction and the DLL's handler sets EBX = -1 ("not Virtual PC") and skips the four bytes. A Unity game's Mono
+// runtime has a vectored exception handler, which runs before any SEH frame, takes that illegal instruction for a crash
+// and never comes back: the game hangs (Unity render thread) or dies with 0xc0000409 (single-threaded rendering) -
+// Absolute Drift, Unity 2017.4 x86. This handler sits in front of Mono's and does exactly what the DLL's own handler
+// does, for that one instruction only. 64-bit code cannot contain the probe.
+std::atomic<int> g_vpcProbes{0};
+
+LONG CALLBACK VpcProbeHandler(EXCEPTION_POINTERS* ep)
+{
+    if (ep->ExceptionRecord->ExceptionCode != EXCEPTION_ILLEGAL_INSTRUCTION) return EXCEPTION_CONTINUE_SEARCH;
+    const unsigned char* ip = (const unsigned char*)(ULONG_PTR)ep->ContextRecord->Eip;
+    __try {
+        if (ip[0] != 0x0F || ip[1] != 0x3F || ip[2] != 0x07 || ip[3] != 0x0B) return EXCEPTION_CONTINUE_SEARCH;
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return EXCEPTION_CONTINUE_SEARCH;
+    }
+    ep->ContextRecord->Ebx = 0xFFFFFFFF;
+    ep->ContextRecord->Eip += 4;
+    g_vpcProbes++;
+    return EXCEPTION_CONTINUE_EXECUTION;
+}
+#endif
+
+// installed at the first SR call (the game's own handlers, Mono's included, are registered by then)
+void InstallVpcProbeHandler()
+{
+#ifndef _WIN64
+    static bool done = false;
+    if (done) return;
+    done = true;
+    AddVectoredExceptionHandler(1, VpcProbeHandler);
+#endif
+}
+
+void LogVpcProbes()
+{
+#ifndef _WIN64
+    static int logged = 0;
+    int n = g_vpcProbes.load();
+    if (n != logged) { logged = n; Log("SR runtime Virtual PC probe (illegal instruction 0F 3F 07 0B) answered ahead of the game's exception handlers (%d so far)", n); }
+#endif
+}
+
 void DoCreate(SR::SRContext** out) { *out = SR::SRContext::create(); }
 
 bool DoCreateSEH(SR::SRContext** out)
@@ -342,6 +388,7 @@ bool SrEnsureContext()
     if (now - g_sr.lastTry < 2000) return false;   // don't hammer the service from the render thread
     g_sr.lastTry = now;
     g_sr.tries++;
+    InstallVpcProbeHandler();
     try {
         if (!DoCreateSEH(&g_sr.ctx)) {
             Log("SR runtime DLLs not found (SimulatedRealityCore/DirectX.dll) - weaving disabled");
@@ -660,6 +707,7 @@ bool EnsureWeaver(IDXGISwapChain* sc, ScState& s)
         s.weaver->setLatencyInFrames((uint64_t)g_cfg.latencyFrames);
         s.weaver->setContext(s.ctx);
     } catch (...) {}
+    LogVpcProbes();
     Log("DX11 weaver created for swapchain %p (hwnd %p, %u buffers, swap effect %d, windowed %d)",
         sc, s.hwnd, d.BufferCount, (int)d.SwapEffect, d.Windowed);
     LogWndProc("after CreateDX11Weaver", s.hwnd);
