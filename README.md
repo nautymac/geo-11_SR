@@ -71,8 +71,8 @@ Problems? Look at `SRWeave.log` in the game folder.
 
 | Folder | Contents |
 |---|---|
-| [`Installer/`](Installer/) | GUI installer (C# WinForms, no console window, English / Korean). Source `src\*.cs`, build `src\build.cmd` (Roslyn csc). Korean manual: [`README_KR.md`](Installer/README_KR.md) |
-| [`SRWeave/`](SRWeave/) | SRWeave `dxgi.dll` source (C++, MinHook, SR SDK). `build.ps1 -Arch all` → `bin\x64\dxgi.dll`, `bin\x86\dxgi.dll`. Notes: [`README.md`](SRWeave/README.md) (Korean) |
+| [`Installer/`](Installer/) | GUI installer (C# WinForms, no console window, English / Korean). Source `src\*.cs`, build `src\build.cmd` (Roslyn csc). Manual: [`README.md`](Installer/README.md) (English), [`README_KR.md`](Installer/README_KR.md) (Korean) |
+| [`SRWeave/`](SRWeave/) | SRWeave `dxgi.dll` source (C++, MinHook, SR SDK). `build.ps1 -Arch all` → `bin\x64\dxgi.dll`, `bin\x86\dxgi.dll`. Notes: [`README.md`](SRWeave/README.md) (English), [`README.ko.md`](SRWeave/README.ko.md) (Korean) |
 
 The fix packages are not in the repository (third-party work, size); they are release assets only.
 

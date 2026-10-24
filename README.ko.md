@@ -72,7 +72,7 @@ UE4 Universal Fix 2 게임은 `-dx11` 인자로 실행해야 합니다. 설치�
 | 폴더 | 내용 |
 |---|---|
 | [`Installer/`](Installer/) | GUI 설치기(C# WinForms, 콘솔 창 없음, 한국어 / 영어). 소스 `src\*.cs`, 빌드 `src\build.cmd`(Roslyn csc). 설명서 [`README_KR.md`](Installer/README_KR.md) |
-| [`SRWeave/`](SRWeave/) | SRWeave `dxgi.dll` 소스(C++, MinHook, SR SDK). `build.ps1 -Arch all` → `bin\x64\dxgi.dll`, `bin\x86\dxgi.dll`. 설명 [`README.md`](SRWeave/README.md) |
+| [`SRWeave/`](SRWeave/) | SRWeave `dxgi.dll` 소스(C++, MinHook, SR SDK). `build.ps1 -Arch all` → `bin\x64\dxgi.dll`, `bin\x86\dxgi.dll`. 설명 [`README.ko.md`](SRWeave/README.ko.md)(한국어), [`README.md`](SRWeave/README.md)(영어) |
 
 픽스 패키지는 저장소에 없고(제3자 저작물, 용량) 릴리스 첨부로만 제공합니다.
 
