@@ -47,10 +47,9 @@ UE4 Universal Fix 2 게임의 `-dx11` 실행 인자는 Steam(시작 옵션)과 H
 - 이미 목록에 있는 게임은 [3D 동작 보고...] 버튼이 꺼집니다. 픽스를 설치하지 않은 게임은 보고할 수 없습니다.
 - 주소 바꾸기 (settings.ini): `compat_list=` (상태 표시줄 [호환 게임 목록] 링크), `compat_json=`, `report=`.
 
-## 언어 / Language
+## 언어
 
-한국어와 영어를 지원합니다. Windows 표시 언어가 한국어면 한국어, 아니면 영어로 시작하고, 창 오른쪽 위의 "English로 바꾸기 / Switch to 한국어"로 바로 바꿀 수 있습니다. 선택은 exe 옆 `settings.ini`(`lang=ko` 또는 `lang=en`)에 저장됩니다. 설정 파일에 쓰는 값(ini 키, 키 표기)은 언어와 무관합니다.
-Korean and English. The Windows display language picks the start language (Korean → Korean, anything else → English); the link at the top right switches at any time, and the choice is stored in `settings.ini` next to the exe. Values written to the game's config files do not depend on the language. Source: `src\Lang.cs` (Korean → English table).
+한국어와 영어를 지원합니다. Windows 표시 언어가 한국어면 한국어, 아니면 영어로 시작하고, 창 오른쪽 위의 "English로 바꾸기 / Switch to 한국어"로 바로 바꿀 수 있습니다. 선택은 exe 옆 `settings.ini`(`lang=ko` 또는 `lang=en`)에 저장됩니다. 설정 파일에 쓰는 값(ini 키, 키 표기)은 언어와 무관합니다. 번역 표는 `src\Lang.cs`(한국어 → 영어)에 있습니다.
 
 ## 사용 흐름 (4단계)
 
