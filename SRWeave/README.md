@@ -15,6 +15,31 @@ VK_ names, 0x hex, none). An invalid value is logged and the default is used.
 
 `diag_exceptions=1` in `SRWeave.ini` uses a vectored exception handler to catch every C++ exception (0xE06D7363) and every fatal exception (access violation, etc.) in the process when it is first thrown. It logs to `SRWeave.log` the throwing module, the exception type (the RTTI name from ThrowInfo), `what()` and a module-level call stack. The same type at the same place is logged in full only twice; after that it is only counted (3DMigoto routinely throws `out_of_range` from `std::map::at`). This is how the Sine Mora EX crash was found to be a `std::bad_alloc` in the game's CRT (2 GB address space exhausted). `diag_input=1` logs the input messages that the game window receives.
 
+## Games that crash in their webcam code (`hide_cameras`)
+
+`hide_cameras` in `SRWeave.ini`: `auto` (default) turns it on only for the games known to need it, `1` for any game, `0` never.
+When on, the game's DirectShow video capture category is empty (`ICreateDevEnum::CreateClassEnumerator` for
+`CLSID_VideoInputDeviceCategory` answers `S_FALSE`, the answer on a PC without a webcam); MinHook hooks `combase!CoCreateInstance(Ex)`
+and, on the first system device enumerator the game creates, that enumerator's method. Only that process and only that category.
+For the games in `kCameraPatches` the game's own camera code is also patched, after checking its bytes.
+Only `bin\x86\dxgi.dll` has been rebuilt with it so far; `bin\x64\dxgi.dll` is still the earlier build until it is tried in a 64-bit game.
+
+### Burnout Paradise Remastered (2026-11-15)
+
+The game (EA app, 32-bit) closed about 13 s after 3D started, during the Criterion intro, now and then:
+an access violation reading NULL at `BurnoutPR.exe+0x4FA626`. The exe on disk is encrypted (EA's DRM), so the code was read from the running
+process. `exe+0x4F9990` is `Open()` of the game's camera object (licence photo, Mugshots): it creates a filter graph and an
+`ICaptureGraphBuilder2` in the object, finds a camera (`exe+0x4FA550`: system device enumerator → `BindToObject(IBaseFilter)` →
+`FindInterface(PIN_CATEGORY_CAPTURE, MEDIATYPE_Video, .., IID_IAMStreamConfig)`), and if that fails releases them again. The game calls it
+from obfuscated code at four places and sometimes from **two threads at once on the same object**: one thread releases the capture graph
+builder while the other uses it (the NULL read), or both release the graph (heap corruption `0xC0000374` in quartz
+`CFilterGraph::Release` → `RemoveAllFilters`, seen with the cameras hidden). So hiding the cameras alone does not help (one of two runs still
+crashed). With `hide_cameras` the first bytes of `Open()` (`55 8B EC 83 E4 F8 81 EC 9C 00 00 00 53 56 8B D9`) become `xor al, al; ret`:
+"no camera", the state a failed `Open()` leaves, and no DirectShow object is created (quartz.dll is not even loaded). The bytes are checked at
+the first dxgi call (the DRM has decrypted the code by then) and on later Presents; a build of the game with other bytes is not touched.
+Verified: twice 2–3 minutes, into free roam, no crash. The SpatialLabs laptop has two cameras (the eye-tracking camera that the SR eye
+tracker opens as weaving starts, and the user-facing one); the race happens with either.
+
 ## How it works
 
 1. On the first `CreateDXGIFactory*` call, it creates a factory with the System32 dxgi (no window needed) and hooks the real

@@ -15,6 +15,28 @@ VK_ 이름, 0x 16진수, none). 잘못된 값은 로그에 남기고 기본값�
 
 `SRWeave.ini`의 `diag_exceptions=1`은 벡터 예외 처리기로 프로세스 안의 모든 C++ 예외(0xE06D7363)와 치명적 예외(접근 위반 등)를 처음 던져질 때 잡아 `SRWeave.log`에 던진 모듈, 예외 형식(ThrowInfo의 RTTI 이름), `what()`, 모듈 단위 호출 스택을 기록한다. 같은 자리의 같은 형식은 두 번만 전부 기록하고 그 뒤는 세기만 한다(3DMigoto가 `std::map::at`으로 `out_of_range`를 일상적으로 던진다). Sine Mora EX의 크래시가 게임 CRT의 `std::bad_alloc`(2 GB 주소 공간 소진)임을 이걸로 찾았다. `diag_input=1`은 게임 창이 받는 입력 메시지를 기록한다.
 
+## 웹캠 코드에서 죽는 게임 (`hide_cameras`)
+
+`SRWeave.ini`의 `hide_cameras`: `auto`(기본)는 필요한 것으로 알려진 게임에서만 켜고, `1`은 모든 게임, `0`은 끈다.
+켜면 게임의 DirectShow 비디오 캡처 카테고리가 비어 보인다(`CLSID_VideoInputDeviceCategory`에 대한 `ICreateDevEnum::CreateClassEnumerator`가
+웹캠 없는 PC와 같은 `S_FALSE`를 돌려준다). MinHook으로 `combase!CoCreateInstance(Ex)`를 걸고, 게임이 처음 만드는 시스템 장치 열거자의
+그 메서드를 건다. 그 프로세스, 그 카테고리만 해당한다. `kCameraPatches`에 있는 게임은 바이트를 확인한 뒤 게임의 카메라 코드도 패치한다.
+지금은 `bin\x86\dxgi.dll`만 이것으로 다시 빌드했다. `bin\x64\dxgi.dll`은 64비트 게임에서 시험하기 전까지 이전 빌드 그대로다.
+
+### Burnout Paradise Remastered (2026-11-15)
+
+게임(EA 앱, 32비트)이 3D가 시작되고 약 13초 뒤, Criterion 인트로 중에 가끔 꺼졌다. `BurnoutPR.exe+0x4FA626`에서 NULL을 읽는 접근 위반이다.
+디스크의 exe는 EA DRM으로 암호화돼 있어서 실행 중인 프로세스에서 코드를 읽었다. `exe+0x4F9990`은 게임 카메라 객체(면허 사진, 머그샷)의
+`Open()`이다. 객체 안에 필터 그래프와 `ICaptureGraphBuilder2`를 만들고, 카메라를 찾고(`exe+0x4FA550`: 시스템 장치 열거자 →
+`BindToObject(IBaseFilter)` → `FindInterface(PIN_CATEGORY_CAPTURE, MEDIATYPE_Video, .., IID_IAMStreamConfig)`), 못 찾으면 다시 해제한다.
+게임은 난독화된 코드 네 곳에서 이 함수를 부르는데, 가끔 **두 스레드가 같은 객체에 대해 동시에** 부른다. 한 스레드가 캡처 그래프 빌더를
+해제하는 동안 다른 스레드가 그것을 쓰거나(NULL 읽기), 둘 다 그래프를 해제한다(카메라를 숨겼을 때 본 quartz `CFilterGraph::Release` →
+`RemoveAllFilters`의 힙 손상 `0xC0000374`). 그래서 카메라만 숨겨서는 안 된다(두 번 중 한 번은 여전히 죽었다). `hide_cameras`가 켜지면
+`Open()`의 첫 바이트(`55 8B EC 83 E4 F8 81 EC 9C 00 00 00 53 56 8B D9`)를 `xor al, al; ret`로 바꾼다. 실패한 `Open()`이 남기는 상태인
+"카메라 없음"이 되고, DirectShow 객체는 하나도 만들지 않는다(quartz.dll도 로드되지 않는다). 바이트는 첫 dxgi 호출 때(그때는 DRM이 코드를
+이미 풀어 놓았다)와 이후 Present 때 확인하고, 바이트가 다른 빌드의 게임은 건드리지 않는다. 확인: 2~3분씩 두 번, 자유 주행까지 들어가 크래시
+없음. SpatialLabs 노트북에는 카메라가 둘 있다(위빙이 시작되면 SR 눈 추적기가 여는 트래킹 카메라와 사용자 쪽 카메라). 경쟁은 어느 쪽이든 생긴다.
+
 ## 동작
 
 1. 첫 `CreateDXGIFactory*` 호출 때 System32 dxgi로 팩토리를 하나 만들어(창 필요 없음) 진짜

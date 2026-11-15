@@ -51,6 +51,8 @@ struct Config {
     bool diagInput = false;  // log what input the game window thread receives
     bool diagExceptions = false;   // log every C++ / fatal exception raised in the process (who throws, type, call stack)
     bool weaverHwnd = true;  // give the weaver the game window (0: nullptr, weaver assumes fullscreen)
+    int hideCameras = -1;    // -1 auto (games in kCameraCrashGames), 0 off, 1 on: the game finds no webcam (DirectShow)
+    bool hideCamerasOn = false;
     // hotkeys (always Ctrl+Alt + this virtual key; 0 = unbound). SRWeave.ini: key_weave=W, key_swap=S, key_lens=L, key_test=T
     int keyWeave = 'W', keySwap = 'S', keyLens = 'L', keyTest = 'T';
 };
@@ -140,6 +142,11 @@ void LoadConfig()
     g_cfg.diagInput = b(L"diag_input", false);
     g_cfg.diagExceptions = b(L"diag_exceptions", false);
     g_cfg.weaverHwnd = b(L"weaver_hwnd", true);
+    {
+        wchar_t buf[16] = {};
+        GetPrivateProfileStringW(L"SRWeave", L"hide_cameras", L"auto", buf, 16, ini.c_str());
+        g_cfg.hideCameras = _wcsicmp(buf, L"1") == 0 ? 1 : _wcsicmp(buf, L"0") == 0 ? 0 : -1;
+    }
     if (g_cfg.log) {
         // overwrite each run: one game session per log
         std::wstring lp = SelfDir() + L"\\SRWeave.log";
@@ -150,6 +157,17 @@ void LoadConfig()
     Log("=== SRWeave geo-11 (dxgi.dll proxy) in %ls (pid %lu) ===", exe, GetCurrentProcessId());
     Log("config: weave=%d swap_eyes=%d lens=%d test=%d srgb=%s latency_frames=%d diag_input=%d diag_exceptions=%d weaver_hwnd=%d",
         g_cfg.weave, g_cfg.swapEyes, g_cfg.lens, g_cfg.test, g_cfg.srgb < 0 ? "auto" : g_cfg.srgb ? "1" : "0", g_cfg.latencyFrames, g_cfg.diagInput, g_cfg.diagExceptions, g_cfg.weaverHwnd);
+    {
+        // auto: on for games known to crash in their webcam code
+        static const wchar_t* const kCameraCrashGames[] = { L"BurnoutPR.exe" };
+        const wchar_t* base = wcsrchr(exe, L'\\');
+        base = base ? base + 1 : exe;
+        bool listed = false;
+        for (const wchar_t* g : kCameraCrashGames) if (_wcsicmp(base, g) == 0) listed = true;
+        g_cfg.hideCamerasOn = g_cfg.hideCameras == 1 || (g_cfg.hideCameras < 0 && listed);
+        Log("hide_cameras=%s -> %s", g_cfg.hideCameras < 0 ? "auto" : g_cfg.hideCameras ? "1" : "0",
+            g_cfg.hideCamerasOn ? (listed && g_cfg.hideCameras < 0 ? "on (a game known to crash in its webcam code)" : "on") : "off");
+    }
     g_cfg.keyWeave = LoadKey(ini, L"key_weave", 'W');
     g_cfg.keySwap = LoadKey(ini, L"key_swap", 'S');
     g_cfg.keyLens = LoadKey(ini, L"key_lens", 'L');
@@ -274,6 +292,66 @@ bool AddrInModule(const void* addr, HMODULE m)
     HMODULE owner = nullptr;
     GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, (LPCWSTR)addr, &owner);
     return owner && owner == m;
+}
+
+// ---- camera code patches (hide_cameras) ----------------------------------------------------
+// Burnout Paradise Remastered (EA app, 32-bit): Open() of its camera object (exe+0x4F9990, __thiscall, returns bool)
+// creates a DirectShow filter graph and capture graph builder in the object, looks for a camera and, failing that,
+// releases them again. About 13 s after the first frame the game sometimes calls it from two threads at once on the
+// same object, and one thread releases what the other is using: an access violation reading NULL at exe+0x4FA626
+// (ICaptureGraphBuilder2::FindInterface on a released builder) or heap corruption 0xC0000374 inside quartz
+// CFilterGraph::Release - with cameras or without. Open is patched to "xor al, al; ret": "no camera", the state a
+// failed Open leaves, without creating any DirectShow object. The game's code is decrypted at run time, so the bytes
+// are checked first (at the first dxgi call and then on Present until they match), and nothing is written otherwise.
+struct CodePatch {
+    const wchar_t* exe;
+    uintptr_t rva;
+    unsigned char expect[16];
+    unsigned char patch[3];
+    const char* what;
+};
+const CodePatch kCameraPatches[] = {
+    { L"BurnoutPR.exe", 0x4F9990, { 0x55, 0x8B, 0xEC, 0x83, 0xE4, 0xF8, 0x81, 0xEC, 0x9C, 0x00, 0x00, 0x00, 0x53, 0x56, 0x8B, 0xD9 },
+      { 0x32, 0xC0, 0xC3 }, "camera Open() -> false" },
+};
+std::atomic<bool> g_cameraPatchDone{ false };
+int g_cameraPatchTries = 0;
+
+bool BytesEqual(const unsigned char* at, const unsigned char* expect, size_t n)
+{
+    __try { return memcmp(at, expect, n) == 0; } __except (EXCEPTION_EXECUTE_HANDLER) { return false; }
+}
+
+void TryCameraPatch()
+{
+    if (g_cameraPatchDone) return;
+    wchar_t exe[MAX_PATH] = {};
+    GetModuleFileNameW(nullptr, exe, MAX_PATH);
+    const wchar_t* name = wcsrchr(exe, L'\\');
+    name = name ? name + 1 : exe;
+    unsigned char* image = (unsigned char*)GetModuleHandleW(nullptr);
+    for (const CodePatch& p : kCameraPatches) {
+        if (_wcsicmp(name, p.exe) != 0) continue;
+        unsigned char* at = image + p.rva;
+        if (!BytesEqual(at, p.expect, sizeof p.expect)) {
+            // still encrypted, or another build of the game: keep looking for a while, then leave it alone
+            if (++g_cameraPatchTries == 1) Log("hide_cameras: %ls+0x%X does not hold the expected code (yet) - not patched", p.exe, (unsigned)p.rva);
+            if (g_cameraPatchTries < 3000) return;
+            Log("hide_cameras: %ls+0x%X never matched - this build of the game is not patched", p.exe, (unsigned)p.rva);
+            break;
+        }
+        DWORD old = 0;
+        if (VirtualProtect(at, sizeof p.patch, PAGE_EXECUTE_READWRITE, &old)) {
+            memcpy(at, p.patch, sizeof p.patch);
+            VirtualProtect(at, sizeof p.patch, old, &old);
+            FlushInstructionCache(GetCurrentProcess(), at, sizeof p.patch);
+            Log("hide_cameras: patched %ls+0x%X: %s (try %d)", p.exe, (unsigned)p.rva, p.what, g_cameraPatchTries + 1);
+        } else {
+            Log("hide_cameras: VirtualProtect failed (%lu) - %ls not patched", GetLastError(), p.exe);
+        }
+        break;
+    }
+    g_cameraPatchDone = true;
 }
 
 // ---- SR runtime ----------------------------------------------------------------------------
@@ -864,6 +942,7 @@ void Weave(IDXGISwapChain* sc)
 void OnPresent(IDXGISwapChain* sc, UINT flags)
 {
     if (t_inPresent || !sc || (flags & DXGI_PRESENT_TEST)) return;
+    if (g_cfg.hideCamerasOn && !g_cameraPatchDone) TryCameraPatch();
     t_inPresent = true;
     Weave(sc);
     t_inPresent = false;
@@ -993,17 +1072,95 @@ HRESULT STDMETHODCALLTYPE Hook_CreateSwapChainForHwnd(IDXGIFactory2* f, IUnknown
     return hr;
 }
 
+// ---- hide cameras (hide_cameras) -----------------------------------------------------------
+// Generic part: the game's DirectShow video capture category is empty - what it gets on a PC without a
+// webcam. For games whose webcam code trips over a camera (webcams, capture cards, virtual cameras, an SR
+// laptop's eye-tracking camera). Only this process, only that category. Burnout Paradise Remastered
+// needs the code patch above as well: its crash is a race between two threads, cameras or not.
+const GUID kCLSID_SystemDeviceEnum = { 0x62BE5D10, 0x60EB, 0x11D0, { 0xBD, 0x3B, 0x00, 0xA0, 0xC9, 0x11, 0xCE, 0x86 } };
+const GUID kCLSID_VideoInputDeviceCategory = { 0x860BB310, 0x5D01, 0x11D0, { 0xBD, 0x3B, 0x00, 0xA0, 0xC9, 0x11, 0xCE, 0x86 } };
+const GUID kIID_ICreateDevEnum = { 0x29840822, 0x5B84, 0x11D0, { 0xBD, 0x3B, 0x00, 0xA0, 0xC9, 0x11, 0xCE, 0x86 } };
+
+typedef HRESULT(STDMETHODCALLTYPE* PFN_CreateClassEnumerator)(IUnknown*, REFCLSID, IUnknown**, DWORD);
+typedef HRESULT(WINAPI* PFN_CoCreateInstance)(REFCLSID, LPUNKNOWN, DWORD, REFIID, LPVOID*);
+typedef HRESULT(WINAPI* PFN_CoCreateInstanceEx)(REFCLSID, IUnknown*, DWORD, COSERVERINFO*, DWORD, MULTI_QI*);
+PFN_CreateClassEnumerator g_origCreateClassEnumerator = nullptr;
+PFN_CoCreateInstance g_origCoCreateInstance = nullptr;
+PFN_CoCreateInstanceEx g_origCoCreateInstanceEx = nullptr;
+std::once_flag g_devEnumHookOnce;
+std::atomic<int> g_camerasHidden{ 0 };
+
+// ICreateDevEnum::CreateClassEnumerator (slot 3)
+HRESULT STDMETHODCALLTYPE Hook_CreateClassEnumerator(IUnknown* self, REFCLSID category, IUnknown** out, DWORD flags)
+{
+    if (IsEqualGUID(category, kCLSID_VideoInputDeviceCategory)) {
+        if (out) *out = nullptr;
+        int n = ++g_camerasHidden;
+        if (n <= 3) Log("hide_cameras: the game asked for the video capture devices - answered: none (#%d)", n);
+        return S_FALSE;   // devenum's answer for an empty category
+    }
+    return g_origCreateClassEnumerator(self, category, out, flags);
+}
+
+// The system device enumerator is one class in devenum.dll: hook its method on the first instance the game creates.
+void HookDevEnum(IUnknown* obj)
+{
+    std::call_once(g_devEnumHookOnce, [obj] {
+        IUnknown* de = nullptr;
+        if (FAILED(obj->QueryInterface(kIID_ICreateDevEnum, (void**)&de)) || !de) { Log("hide_cameras: no ICreateDevEnum - cameras not hidden"); return; }
+        void* target = (*(void***)de)[3];
+        MH_STATUS st = MH_CreateHook(target, (void*)&Hook_CreateClassEnumerator, (void**)&g_origCreateClassEnumerator);
+        if (st == MH_OK) st = MH_EnableHook(target);
+        Log("hide_cameras: hook ICreateDevEnum::CreateClassEnumerator @ %p (%s): %s", target, ModuleOf(target).c_str(), MH_StatusToString(st));
+        de->Release();
+    });
+}
+
+HRESULT WINAPI Hook_CoCreateInstance(REFCLSID clsid, LPUNKNOWN outer, DWORD ctx, REFIID riid, LPVOID* out)
+{
+    HRESULT hr = g_origCoCreateInstance(clsid, outer, ctx, riid, out);
+    if (SUCCEEDED(hr) && out && *out && IsEqualGUID(clsid, kCLSID_SystemDeviceEnum)) HookDevEnum((IUnknown*)*out);
+    return hr;
+}
+
+HRESULT WINAPI Hook_CoCreateInstanceEx(REFCLSID clsid, IUnknown* outer, DWORD ctx, COSERVERINFO* server, DWORD n, MULTI_QI* qi)
+{
+    HRESULT hr = g_origCoCreateInstanceEx(clsid, outer, ctx, server, n, qi);
+    if (SUCCEEDED(hr) && qi && IsEqualGUID(clsid, kCLSID_SystemDeviceEnum))
+        for (DWORD i = 0; i < n; i++)
+            if (SUCCEEDED(qi[i].hr) && qi[i].pItf) { HookDevEnum(qi[i].pItf); break; }
+    return hr;
+}
+
+// combase.dll holds the implementation; ole32's exports forward there.
+void StartCameraHiding()
+{
+    HMODULE cb = GetModuleHandleW(L"combase.dll");
+    if (!cb) cb = LoadLibraryW(L"combase.dll");
+    struct { const char* name; void* detour; void** orig; } hooks[] = {
+        { "CoCreateInstance", (void*)&Hook_CoCreateInstance, (void**)&g_origCoCreateInstance },
+        { "CoCreateInstanceEx", (void*)&Hook_CoCreateInstanceEx, (void**)&g_origCoCreateInstanceEx },
+    };
+    for (auto& h : hooks) {
+        void* target = cb ? (void*)GetProcAddress(cb, h.name) : nullptr;
+        MH_STATUS st = target ? MH_CreateHook(target, h.detour, h.orig) : MH_ERROR_FUNCTION_NOT_FOUND;
+        if (st == MH_OK) st = MH_EnableHook(target);
+        Log("hide_cameras: hook combase!%s @ %p: %s", h.name, target, MH_StatusToString(st));
+    }
+}
+
 std::once_flag g_factoryHookOnce;
 
 // Called from the first dxgi export call, before anyone can have created a swap chain.
 void StartHooks()
 {
     std::call_once(g_factoryHookOnce, [] {
+        MH_Initialize();
+        if (g_cfg.hideCamerasOn) { TryCameraPatch(); StartCameraHiding(); }
         LoadReal();
         auto create1 = RealDxgi<HRESULT(WINAPI*)(REFIID, void**)>("CreateDXGIFactory1");
         IDXGIFactory2* f = nullptr;
         if (!create1 || FAILED(create1(__uuidof(IDXGIFactory2), (void**)&f)) || !f) { Log("real IDXGIFactory2 not available - no hooks"); return; }
-        MH_Initialize();
         void** vt = *(void***)f;
         HookOne("IDXGIFactory::CreateSwapChain", vt, 10, (void*)&Hook_CreateSwapChain, (void**)&g_origCreateSwapChain);
         HookOne("IDXGIFactory2::CreateSwapChainForHwnd", vt, 15, (void*)&Hook_CreateSwapChainForHwnd, (void**)&g_origCreateSwapChainForHwnd);
