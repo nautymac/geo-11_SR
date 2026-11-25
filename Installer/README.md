@@ -101,6 +101,8 @@ When you load a game that is already set up with [Change settings], its current 
 | geo-11 | Ctrl+F3 / Ctrl+F4 | Separation down / up |
 | geo-11 | Ctrl+F5 / Ctrl+F6 | Convergence down / up |
 | geo-11 | Ctrl+F7 | Save current values (persist in d3dxdm.ini) |
+| geo-11 | L1+R1 + D-pad (controller) | Up / down = Separation up / down, right / left = Convergence up / down |
+| geo-11 | (auto) | 0.5 s after an adjustment key or the controller combo is released, the values are saved as with Ctrl+F7 |
 | geo-11 | Ctrl+F1 | Show stereo values overlay |
 | Overlay | NumPad 0 | Show / hide the overlay (3DMigoto Hunting: shader info and key hints) — when the overlay mode is 1 or 2 |
 | Overlay | F10 | Reload settings / fixes |

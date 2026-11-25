@@ -99,6 +99,8 @@ UE4 Universal Fix 2 게임의 `-dx11` 실행 인자는 Steam(시작 옵션)과 H
 | geo-11 | Ctrl+F3 / Ctrl+F4 | Separation 감소 / 증가 |
 | geo-11 | Ctrl+F5 / Ctrl+F6 | Convergence 감소 / 증가 |
 | geo-11 | Ctrl+F7 | 현재 값 저장 (d3dxdm.ini에 persist) |
+| geo-11 | L1+R1 + 십자키 (게임패드) | 위 / 아래 = Separation 증가 / 감소, 오른쪽 / 왼쪽 = Convergence 증가 / 감소 |
+| geo-11 | (자동) | 조절 키나 패드 조합을 놓고 0.5초 뒤 Ctrl+F7처럼 값을 저장 |
 | geo-11 | Ctrl+F1 | 입체 값 오버레이 표시 |
 | 오버레이 | 숫자패드 0 | 오버레이(3DMigoto Hunting: 셰이더 정보·조작 안내) 표시/숨김 — 오버레이 모드가 1 또는 2일 때 |
 | 오버레이 | F10 | 설정 / 픽스 다시 읽기 |
